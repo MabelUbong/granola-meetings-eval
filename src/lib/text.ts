@@ -87,7 +87,7 @@ export function tokenize(input: string): string[] {
   const normalized = normalizeWhitespace(input).toLowerCase();
   return normalized
     .split(/[^a-z0-9$%.]+/g)
-    .map(token => token.trim())
+    .map(token => token.trim().replace(/^\.+|\.+$/g, ''))
     .filter(token => token.length > 1 && !STOPWORDS.has(token));
 }
 
