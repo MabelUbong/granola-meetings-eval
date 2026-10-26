@@ -1,6 +1,6 @@
 # Granola Meetings Agent Benchmark Report
 
-Generated: 2026-10-26T19:01:05.228Z
+Generated: 2026-10-26T19:25:54.592Z
 
 ## Abstract
 
@@ -38,25 +38,25 @@ These are agent-harness comparisons rather than only model comparisons. The defa
 
 | Harness | Avg score | LLM judge (optional) | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Notes BM25 | 0.798 | not run | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 154 ms |
-| Compact Hybrid BM25 | 0.740 | not run | 85% | 45% | 85% | 32% | 0% | 100% | 3516 | $0.0000 | 2639 ms |
-| Hybrid Transcript BM25 | 0.795 | not run | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2687 ms |
-| Wide Context Hybrid BM25 | 0.802 | not run | 100% | 48% | 90% | 35% | 0% | 100% | 9229 | $0.0000 | 2728 ms |
-| Recency Weighted Hybrid BM25 | 0.794 | not run | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 3393 ms |
-| Vector DB + BM25 RAG | 0.787 | not run | 95% | 48% | 90% | 36% | 0% | 100% | 6339 | $0.0000 | 3036 ms |
-| OpenAI Semantic Hybrid | 0.810 | not run | 98% | 61% | 98% | 27% | 10% | 100% | 33978 | $0.0158 | 14726 ms |
+| Notes BM25 | 0.798 | 0.709 | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 171 ms |
+| Compact Hybrid BM25 | 0.740 | 0.672 | 85% | 45% | 85% | 32% | 0% | 100% | 3516 | $0.0000 | 2789 ms |
+| Hybrid Transcript BM25 | 0.795 | 0.699 | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2759 ms |
+| Wide Context Hybrid BM25 | 0.802 | 0.696 | 100% | 48% | 90% | 35% | 0% | 100% | 9229 | $0.0000 | 2696 ms |
+| Recency Weighted Hybrid BM25 | 0.795 | 0.694 | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2663 ms |
+| Vector DB + BM25 RAG | 0.787 | 0.694 | 95% | 48% | 90% | 36% | 0% | 100% | 6339 | $0.0000 | 2951 ms |
+| OpenAI Semantic Hybrid | 0.812 | 0.594 | 98% | 62% | 98% | 27% | 10% | 100% | 33964 | $0.0157 | 14996 ms |
 
-Best overall: OpenAI Semantic Hybrid at 0.810.
+Best overall: OpenAI Semantic Hybrid at 0.812.
 
 ## Case-Level Scores
 
 | Case | Category | Difficulty | Query | Scores |
 | --- | --- | --- | --- | --- |
 | deepgram_pricing_capacity_evolution | cross-meeting synthesis | hard | How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks? | notes_bm25: 0.753; compact_hybrid_bm25: 0.710; hybrid_transcript_bm25: 0.753; wide_context_hybrid_bm25: 0.753; recency_weighted_hybrid_bm25: 0.753; local_vector_database_rag: 0.753; openai_semantic_hybrid: 0.803 |
-| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | notes_bm25: 0.835; compact_hybrid_bm25: 0.873; hybrid_transcript_bm25: 0.873; wide_context_hybrid_bm25: 0.835; recency_weighted_hybrid_bm25: 0.873; local_vector_database_rag: 0.873; openai_semantic_hybrid: 0.837 |
-| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | notes_bm25: 0.975; compact_hybrid_bm25: 0.680; hybrid_transcript_bm25: 0.943; wide_context_hybrid_bm25: 0.943; recency_weighted_hybrid_bm25: 0.943; local_vector_database_rag: 0.943; openai_semantic_hybrid: 0.858 |
-| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | notes_bm25: 0.661; compact_hybrid_bm25: 0.661; hybrid_transcript_bm25: 0.741; wide_context_hybrid_bm25: 0.821; recency_weighted_hybrid_bm25: 0.732; local_vector_database_rag: 0.661; openai_semantic_hybrid: 0.629 |
-| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | notes_bm25: 0.755; compact_hybrid_bm25: 0.729; hybrid_transcript_bm25: 0.735; wide_context_hybrid_bm25: 0.763; recency_weighted_hybrid_bm25: 0.735; local_vector_database_rag: 0.735; openai_semantic_hybrid: 0.882 |
+| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | notes_bm25: 0.835; compact_hybrid_bm25: 0.873; hybrid_transcript_bm25: 0.873; wide_context_hybrid_bm25: 0.835; recency_weighted_hybrid_bm25: 0.873; local_vector_database_rag: 0.873; openai_semantic_hybrid: 0.800 |
+| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | notes_bm25: 0.975; compact_hybrid_bm25: 0.680; hybrid_transcript_bm25: 0.943; wide_context_hybrid_bm25: 0.943; recency_weighted_hybrid_bm25: 0.943; local_vector_database_rag: 0.943; openai_semantic_hybrid: 0.923 |
+| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | notes_bm25: 0.661; compact_hybrid_bm25: 0.661; hybrid_transcript_bm25: 0.741; wide_context_hybrid_bm25: 0.821; recency_weighted_hybrid_bm25: 0.741; local_vector_database_rag: 0.661; openai_semantic_hybrid: 0.629 |
+| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | notes_bm25: 0.755; compact_hybrid_bm25: 0.729; hybrid_transcript_bm25: 0.735; wide_context_hybrid_bm25: 0.763; recency_weighted_hybrid_bm25: 0.735; local_vector_database_rag: 0.735; openai_semantic_hybrid: 0.872 |
 | latest_standup_launch_blockers | temporal retrieval | medium | What were the action items and launch blockers in the latest standup? | notes_bm25: 0.798; compact_hybrid_bm25: 0.798; hybrid_transcript_bm25: 0.798; wide_context_hybrid_bm25: 0.798; recency_weighted_hybrid_bm25: 0.798; local_vector_database_rag: 0.798; openai_semantic_hybrid: 0.789 |
 | ramp_enterprise_terms | sales retrieval | easy | What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed? | notes_bm25: 0.824; compact_hybrid_bm25: 0.824; hybrid_transcript_bm25: 0.824; wide_context_hybrid_bm25: 0.824; recency_weighted_hybrid_bm25: 0.824; local_vector_database_rag: 0.824; openai_semantic_hybrid: 0.945 |
 | kraken_procurement_readiness | sales retrieval | easy | What procurement and security requirements did Kraken raise before broader Granola rollout? | notes_bm25: 0.776; compact_hybrid_bm25: 0.776; hybrid_transcript_bm25: 0.776; wide_context_hybrid_bm25: 0.776; recency_weighted_hybrid_bm25: 0.776; local_vector_database_rag: 0.776; openai_semantic_hybrid: 0.853 |
