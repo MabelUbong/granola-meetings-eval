@@ -5,6 +5,7 @@ data/processed/
 dist/
 dist-node/
 node_modules/
+.vercel/
 reports/*.json
 reports/human-review.csv
 .vite/
