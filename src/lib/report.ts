@@ -13,7 +13,8 @@ export function renderMarkdownReport(run: BenchmarkRun): string {
   const summaryRows = run.summaries
     .map(
       summary => {
-        const llmJudgeScore = summary.llmJudgeScore === undefined ? 'n/a' : summary.llmJudgeScore.toFixed(3);
+        const llmJudgeScore =
+          summary.llmJudgeScore === undefined ? 'not run' : summary.llmJudgeScore.toFixed(3);
         return `| ${summary.label} | ${summary.averageScore.toFixed(3)} | ${llmJudgeScore} | ${pct(
           summary.retrievalRecallAtK,
         )} | ${pct(summary.expectedTermCoverage)} | ${pct(summary.citationRecall)} | ${pct(
@@ -96,11 +97,11 @@ ${harnessDesignRows}
 
 ## Results
 
-| Harness | Avg score | LLM judge | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
+| Harness | Avg score | LLM judge (optional) | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${summaryRows}
 
-Best overall: ${best ? `${best.label} at ${best.averageScore.toFixed(3)}` : 'n/a'}.
+Best overall: ${best ? `${best.label} at ${best.averageScore.toFixed(3)}` : 'unavailable'}.
 
 ## Case-Level Scores
 

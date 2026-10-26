@@ -36,15 +36,15 @@ These are agent-harness comparisons rather than only model comparisons. The defa
 
 ## Results
 
-| Harness | Avg score | LLM judge | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
+| Harness | Avg score | LLM judge (optional) | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Notes BM25 | 0.798 | n/a | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 154 ms |
-| Compact Hybrid BM25 | 0.740 | n/a | 85% | 45% | 85% | 32% | 0% | 100% | 3516 | $0.0000 | 2639 ms |
-| Hybrid Transcript BM25 | 0.795 | n/a | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2687 ms |
-| Wide Context Hybrid BM25 | 0.802 | n/a | 100% | 48% | 90% | 35% | 0% | 100% | 9229 | $0.0000 | 2728 ms |
-| Recency Weighted Hybrid BM25 | 0.794 | n/a | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 3393 ms |
-| Vector DB + BM25 RAG | 0.787 | n/a | 95% | 48% | 90% | 36% | 0% | 100% | 6339 | $0.0000 | 3036 ms |
-| OpenAI Semantic Hybrid | 0.810 | n/a | 98% | 61% | 98% | 27% | 10% | 100% | 33978 | $0.0158 | 14726 ms |
+| Notes BM25 | 0.798 | not run | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 154 ms |
+| Compact Hybrid BM25 | 0.740 | not run | 85% | 45% | 85% | 32% | 0% | 100% | 3516 | $0.0000 | 2639 ms |
+| Hybrid Transcript BM25 | 0.795 | not run | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2687 ms |
+| Wide Context Hybrid BM25 | 0.802 | not run | 100% | 48% | 90% | 35% | 0% | 100% | 9229 | $0.0000 | 2728 ms |
+| Recency Weighted Hybrid BM25 | 0.794 | not run | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 3393 ms |
+| Vector DB + BM25 RAG | 0.787 | not run | 95% | 48% | 90% | 36% | 0% | 100% | 6339 | $0.0000 | 3036 ms |
+| OpenAI Semantic Hybrid | 0.810 | not run | 98% | 61% | 98% | 27% | 10% | 100% | 33978 | $0.0158 | 14726 ms |
 
 Best overall: OpenAI Semantic Hybrid at 0.810.
 

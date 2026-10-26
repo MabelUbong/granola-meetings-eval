@@ -511,7 +511,7 @@ function App() {
             <span>Score</span>
             <span>Evidence</span>
             <span>Citation Span</span>
-            <span>Judge</span>
+            <span>LLM Judge</span>
             <span>Latency</span>
             <span>Tokens</span>
             <span>Cost</span>
@@ -792,7 +792,7 @@ function ConfigRow({
       <span>{formatPct(summary.evidenceRecall)}</span>
       <span className={metricTone(summary.citationSupport)}>{formatPct(summary.citationSupport)}</span>
       <span>
-        {summary.llmJudgeScore !== undefined ? formatScore(summary.llmJudgeScore) : 'n/a'}
+        {summary.llmJudgeScore !== undefined ? formatScore(summary.llmJudgeScore) : 'not run'}
       </span>
       <span>{formatLatency(summary.latencyMs)}</span>
       <span>{formatNumber(Math.round(summary.avgTokens))}</span>
