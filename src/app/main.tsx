@@ -443,10 +443,12 @@ function App() {
           </p>
         </article>
         <article className="kpi">
-          <span className="kpi-label">Judge coverage</span>
-          <strong>{derived.judgeModels.length ? derived.judgeModels.join(', ') : 'Local only'}</strong>
+          <span className="kpi-label">Judge mode</span>
+          <strong>{derived.judgeModels.length ? derived.judgeModels.join(', ') : 'Local grader'}</strong>
           <p>
-            {derived.judgeFailures === 0
+            {derived.judgeModels.length === 0
+              ? 'Deterministic offline grading; no LLM judge calls'
+              : derived.judgeFailures === 0
               ? 'All judge calls completed'
               : `${derived.judgeFailures} judge calls failed`}
           </p>
@@ -454,7 +456,11 @@ function App() {
         <article className="kpi">
           <span className="kpi-label">Runtime profile</span>
           <strong>{formatLatency(derived.avgLatency)}</strong>
-          <p>{formatCurrency(derived.totalCost)} estimated run cost</p>
+          <p>
+            {derived.totalCost === 0
+              ? 'No paid API calls in this run'
+              : `${formatCurrency(derived.totalCost)} estimated run cost`}
+          </p>
         </article>
       </section>
 
