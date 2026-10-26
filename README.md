@@ -225,7 +225,7 @@ The eval set includes retrieval-style questions, lateral/cross-meeting synthesis
 - Answering: deterministic extractive answering is the default for repeatable CI-style evals; model-backed answering is opt-in with `--llm`. Evidence: `src/lib/answer.ts`.
 - Judging: deterministic metrics remain primary; optional `--judge` adds semantic validation when API access is available. Evidence: `src/lib/grade.ts`, `src/lib/llmJudge.ts`.
 - Observability: every run records interpretation, retrieval, generation, and optional judge trace steps with latency and structured outputs. Evidence: `src/cli/eval.ts`, `src/lib/types.ts`.
-- Cost control: token and API-cost estimates are recorded per answer and summarized by harness; regression checks enforce latency, cost, recall, citation support, and hallucination guardrails. Evidence: `src/lib/metrics.ts`, `src/cli/regression.ts`.
+- Cost control: token and API-cost estimates are recorded per answer and summarized by harness; regression checks enforce latency, cost, recall, hallucination, and citation-support guardrails, with a separate citation-support threshold for model-backed harnesses. Evidence: `src/lib/metrics.ts`, `src/cli/regression.ts`.
 - Review loop: generated reports and human-review CSVs make it easy to inspect borderline cases and improve the benchmark. Evidence: `src/lib/report.ts`, `src/cli/humanReview.ts`.
 
 ## Data and Secret Handling

@@ -135,7 +135,7 @@ Good answers must be grounded in retrieved meeting evidence, cite source meeting
 
 ## Cost Efficiency
 
-Each result includes estimated prompt tokens, completion tokens, embedding tokens, context size, latency, and estimated third-party API cost. The estimates are configurable through environment variables, which lets the benchmark model routing and pricing changes without changing code. The \`check-regressions\` command enforces latency, cost, retrieval-recall, citation-support, and hallucination thresholds before a new run is accepted. Cost controls to extend next are cache hit-rate tracking, model routing by case difficulty, max-context budgets, embedding-cache warmup, and per-query spend caps.
+Each result includes estimated prompt tokens, completion tokens, embedding tokens, context size, latency, and estimated third-party API cost. The estimates are configurable through environment variables, which lets the benchmark model routing and pricing changes without changing code. The \`check-regressions\` command enforces latency, cost, retrieval-recall, hallucination, and citation-support thresholds before a new run is accepted, with a separate citation-support guardrail for model-backed harnesses because generated answers cite less extractively than the deterministic baseline. Cost controls to extend next are cache hit-rate tracking, model routing by case difficulty, max-context budgets, embedding-cache warmup, and per-query spend caps.
 
 ## A/B Experiment Plan
 

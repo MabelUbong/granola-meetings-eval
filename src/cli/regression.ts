@@ -8,19 +8,24 @@ async function main(): Promise<void> {
   const inPath = argString(args, 'in', 'reports/latest-results.json');
   const minRecall = argNumber(args, 'min-recall', 0.75);
   const minCitationSupport = argNumber(args, 'min-citation-support', 0.3);
+  const minModelCitationSupport = argNumber(args, 'min-model-citation-support', 0.25);
   const maxHallucination = argNumber(args, 'max-hallucination', 0.25);
   const maxLatencyMs = argNumber(args, 'max-latency-ms', 15000);
   const maxRunCostUsd = argNumber(args, 'max-run-cost-usd', 2);
   const run = loadJsonFile<BenchmarkRun>(path.resolve(inPath));
+  const configsById = new Map(run.configs.map(config => [config.id, config]));
 
   const failures: string[] = [];
   for (const summary of run.summaries) {
     if (summary.retrievalRecallAtK < minRecall) {
       failures.push(`${summary.configId} recall@k ${summary.retrievalRecallAtK} < ${minRecall}`);
     }
-    if (summary.citationSupport < minCitationSupport) {
+    const config = configsById.get(summary.configId);
+    const citationSupportThreshold =
+      config?.answerStrategy === 'openai' ? minModelCitationSupport : minCitationSupport;
+    if (summary.citationSupport < citationSupportThreshold) {
       failures.push(
-        `${summary.configId} citation support ${summary.citationSupport} < ${minCitationSupport}`,
+        `${summary.configId} citation support ${summary.citationSupport} < ${citationSupportThreshold}`,
       );
     }
     if (summary.hallucinationRate > maxHallucination) {
@@ -40,7 +45,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `Regression check passed for ${run.summaries.length} configs: recall>=${minRecall}, citationSupport>=${minCitationSupport}, hallucination<=${maxHallucination}, latency<=${maxLatencyMs}ms, cost<=${maxRunCostUsd}.`,
+    `Regression check passed for ${run.summaries.length} configs: recall>=${minRecall}, citationSupport>=${minCitationSupport} local / >=${minModelCitationSupport} model-backed, hallucination<=${maxHallucination}, latency<=${maxLatencyMs}ms, cost<=${maxRunCostUsd}.`,
   );
 }
 
