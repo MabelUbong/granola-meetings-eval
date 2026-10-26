@@ -37,7 +37,7 @@ function App() {
         <section className="empty">
           <h1>Granola Meetings Eval</h1>
           <p>Run results are not available yet.</p>
-          <code>/usr/bin/npm run prepare-data</code>
+          <code>npm run prepare-data</code>
           <p className="muted">{error}</p>
         </section>
       </main>
@@ -129,7 +129,7 @@ function App() {
                 className={testCase.id === selectedCase.id ? 'case-button active' : 'case-button'}
                 key={testCase.id}
                 onClick={() => setSelectedCaseId(testCase.id)}>
-                <span>{testCase.id.replaceAll('_', ' ')}</span>
+                <span>{testCase.id.replace(/_/g, ' ')}</span>
                 <strong>{avg.toFixed(2)}</strong>
               </button>
             );
