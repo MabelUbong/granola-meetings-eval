@@ -5,6 +5,7 @@ import {getConfigs} from '../lib/configs';
 import {datasetStats, loadJsonFile, loadMeetings, writeJsonFile} from '../lib/data';
 import {loadLocalEnv} from '../lib/env';
 import {gradeAnswer, summarizeGrades} from '../lib/grade';
+import {judgeAnswerWithOpenAI} from '../lib/llmJudge';
 import {estimateEmbeddingCostUsd, estimateTokens, roundUsd} from '../lib/metrics';
 import {retrieve} from '../lib/retrieval';
 import {retrieveWithOpenAIEmbeddings} from '../lib/semanticRetrieval';
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
   const selectedConfig = argString(args, 'config', 'all');
   const useLlm = argBoolean(args, 'llm');
   const includeOpenAI = argBoolean(args, 'include-openai');
+  const useJudge = argBoolean(args, 'judge');
 
   const meetings = loadMeetings(path.resolve(meetingsPath));
   const cases = loadJsonFile<EvalCase[]>(path.resolve(evalsPath));
@@ -110,8 +112,12 @@ async function main(): Promise<void> {
             : 0),
       );
       answer.latencyMs += retrievalLatencyMs + interpretationStep.latencyMs;
+      const judgeResult = useJudge ? await judgeAnswerWithOpenAI(testCase, answer) : undefined;
+      if (judgeResult) {
+        answer.steps.push(judgeResult.step);
+      }
       answers.push(answer);
-      grades.push(gradeAnswer(testCase, answer));
+      grades.push(gradeAnswer(testCase, answer, judgeResult?.judge));
     }
   }
 

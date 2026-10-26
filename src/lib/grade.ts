@@ -1,5 +1,5 @@
 import {termAppears, tokenize} from './text';
-import {AgentAnswer, CaseGrade, Citation, ConfigSummary, EvidenceRequirement, EvalCase} from './types';
+import {AgentAnswer, CaseGrade, Citation, ConfigSummary, EvidenceRequirement, EvalCase, LlmJudgeResult} from './types';
 
 function average(values: number[]): number {
   if (values.length === 0) {
@@ -51,7 +51,7 @@ function citationSpanScore(requirement: EvidenceRequirement, citations: Citation
   );
 }
 
-export function gradeAnswer(testCase: EvalCase, answer: AgentAnswer): CaseGrade {
+export function gradeAnswer(testCase: EvalCase, answer: AgentAnswer, llmJudge?: LlmJudgeResult): CaseGrade {
   const requiredIds = testCase.requiredEvidence.map(item => item.meetingId);
   const retrievedIds = new Set(answer.contexts.map(context => context.meetingId));
   const citationIds = new Set(answer.citations.map(citation => citation.meetingId));
@@ -127,6 +127,7 @@ export function gradeAnswer(testCase: EvalCase, answer: AgentAnswer): CaseGrade 
     missingEvidenceIds,
     poorCitationSpanIds,
     missingTerms,
+    llmJudge,
   };
 }
 
@@ -139,6 +140,7 @@ export function summarizeGrades(
   return configIds.map(configId => {
     const matchingGrades = grades.filter(grade => grade.configId === configId);
     const matchingAnswers = answers.filter(answer => answer.configId === configId);
+    const judgedGrades = matchingGrades.filter(grade => grade.llmJudge && !grade.llmJudge.error);
     return {
       configId,
       label: labelsByConfig.get(configId) || configId,
@@ -156,6 +158,14 @@ export function summarizeGrades(
         matchingAnswers.reduce((sum, answer) => sum + answer.metrics.estimatedCostUsd, 0).toFixed(6),
       ),
       latencyMs: Number(average(matchingAnswers.map(answer => answer.latencyMs)).toFixed(1)),
+      llmJudgeScore:
+        judgedGrades.length === 0
+          ? undefined
+          : round(average(judgedGrades.map(grade => grade.llmJudge?.score || 0))),
+      llmJudgeFaithfulness:
+        judgedGrades.length === 0
+          ? undefined
+          : round(average(judgedGrades.map(grade => grade.llmJudge?.citationFaithfulness || 0))),
     };
   });
 }

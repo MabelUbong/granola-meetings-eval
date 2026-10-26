@@ -104,6 +104,23 @@ export type AgentAnswer = {
   model?: string;
 };
 
+export type LlmJudgeResult = {
+  model: string;
+  score: number;
+  answerCorrectness: number;
+  citationFaithfulness: number;
+  completeness: number;
+  hallucinationRisk: number;
+  rationale: string;
+  missingEvidence: string[];
+  unsupportedClaims: string[];
+  latencyMs: number;
+  promptTokensEstimate: number;
+  completionTokensEstimate: number;
+  estimatedCostUsd: number;
+  error?: string;
+};
+
 export type CaseGrade = {
   caseId: string;
   configId: string;
@@ -121,6 +138,7 @@ export type CaseGrade = {
   missingEvidenceIds: string[];
   poorCitationSpanIds: string[];
   missingTerms: string[];
+  llmJudge?: LlmJudgeResult;
 };
 
 export type ConfigSummary = {
@@ -138,6 +156,8 @@ export type ConfigSummary = {
   avgTokens: number;
   estimatedCostUsd: number;
   latencyMs: number;
+  llmJudgeScore?: number;
+  llmJudgeFaithfulness?: number;
 };
 
 export type BenchmarkRun = {

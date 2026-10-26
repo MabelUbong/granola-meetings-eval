@@ -8,8 +8,9 @@ export function renderMarkdownReport(run: BenchmarkRun): string {
   const best = [...run.summaries].sort((a, b) => b.averageScore - a.averageScore)[0];
   const summaryRows = run.summaries
     .map(
-      summary =>
-        `| ${summary.label} | ${summary.averageScore.toFixed(3)} | ${pct(
+      summary => {
+        const llmJudgeScore = summary.llmJudgeScore === undefined ? 'n/a' : summary.llmJudgeScore.toFixed(3);
+        return `| ${summary.label} | ${summary.averageScore.toFixed(3)} | ${llmJudgeScore} | ${pct(
           summary.retrievalRecallAtK,
         )} | ${pct(summary.expectedTermCoverage)} | ${pct(summary.citationRecall)} | ${pct(
           summary.citationSupport,
@@ -19,7 +20,8 @@ export function renderMarkdownReport(run: BenchmarkRun): string {
           summary.toolSuccess,
         )} | ${summary.avgTokens.toFixed(0)} | $${summary.estimatedCostUsd.toFixed(4)} | ${summary.latencyMs.toFixed(
           0,
-        )} ms |`,
+        )} ms |`;
+      },
     )
     .join('\n');
 
@@ -69,8 +71,8 @@ ${run.configs
 
 ## Results
 
-| Harness | Avg score | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Harness | Avg score | LLM judge | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${summaryRows}
 
 Best overall: ${best ? `${best.label} at ${best.averageScore.toFixed(3)}` : 'n/a'}.
@@ -85,19 +87,20 @@ ${caseRows}
 
 The benchmark is deliberately small, but the cases stress different failure modes. Notes-only retrieval should do well when Granola's generated notes already contain the answer, while transcript search should recover details that were omitted or phrased differently in notes. Temporal cases test whether a harness recognizes "latest" as an ordering constraint instead of a lexical keyword. Cross-meeting cases test diversification: returning six chunks from one meeting is usually worse than returning one strong chunk from each relevant meeting.
 
-The current default run uses deterministic extractive answering so the benchmark is repeatable without an API key. When \`OPENAI_API_KEY\` is set, the same harness can run model-backed answering; the deterministic grader remains the same so retrieval and model changes are comparable.
+The current default run uses deterministic extractive answering so the benchmark is repeatable without an API key. When \`OPENAI_API_KEY\` is set, the same harness can run model-backed answering; the deterministic grader remains the same so retrieval and model changes are comparable. Passing \`--judge\` adds an OpenAI LLM-as-judge pass that scores semantic correctness, citation faithfulness, completeness, and hallucination risk as secondary diagnostics.
 
 Each result row includes a trace with:
 
 - \`interpret_query\`: query category, difficulty, temporal intent, and expected retrieval shape.
 - \`retrieve_context\`: retrieval strategy, context budget, returned meeting IDs, chunk types, and scores.
 - \`generate_answer_*\`: whether the answer used an LLM or the deterministic extractive fallback, citation IDs, and fallback errors if any.
+- \`judge_answer_with_model\`: optional LLM-as-judge scores and rationale when \`--judge\` is enabled.
 
 ## Observability and Evaluation
 
 The harness records structured traces for every case: query interpretation, retrieval/tool parameters, returned meeting IDs, chunk types, scores, answer generation mode, citation IDs, success/failure flags, and per-step latency. These traces support offline debugging and can be emitted unchanged in an online system.
 
-Offline evaluation is covered by the golden JSON eval set and deterministic grader. It reports answer correctness proxy, citation recall, citation span support, hallucination rate, retrieval recall@k, tool-call success rate, latency, token estimates, and cost estimates. Human review is supported by the generated review CSV, where reviewers can score helpfulness, grounding, citation quality, hallucination risk, and whether missing/ambiguous evidence was handled correctly.
+Offline evaluation is covered by the golden JSON eval set and deterministic grader. It reports answer correctness proxy, citation recall, citation span support, hallucination rate, retrieval recall@k, tool-call success rate, latency, token estimates, and cost estimates. The optional LLM judge adds a semantic check for answer correctness and faithfulness, but it is kept separate from the deterministic score because judge models introduce cost and variance. Human review is supported by the generated review CSV, where reviewers can score helpfulness, grounding, citation quality, hallucination risk, and whether missing/ambiguous evidence was handled correctly.
 
 For online evaluation, the same cases map naturally to A/B experiments: route a cohort to a candidate harness, monitor user feedback, citation click-through, reformulation rate, thumbs up/down, task completion, human-review sampling, latency percentiles, and estimated cost per successful answer.
 

@@ -112,6 +112,12 @@ function App() {
                 <dt>Latency</dt>
                 <dd>{summary.latencyMs.toFixed(0)}ms</dd>
               </div>
+              {summary.llmJudgeScore !== undefined ? (
+                <div>
+                  <dt>Judge</dt>
+                  <dd>{summary.llmJudgeScore.toFixed(3)}</dd>
+                </div>
+              ) : null}
             </dl>
           </article>
         ))}
@@ -184,6 +190,7 @@ function App() {
                       <span>Cite span {formatPct(grade.citationSupport)}</span>
                       <span>Halluc. {formatPct(grade.hallucinationRisk)}</span>
                       <span>Tool {formatPct(grade.toolSuccess)}</span>
+                      {grade.llmJudge ? <span>Judge {grade.llmJudge.score.toFixed(3)}</span> : null}
                       <span>{answer.metrics.totalTokensEstimate} est. tokens</span>
                       <span>${answer.metrics.estimatedCostUsd.toFixed(5)}</span>
                     </div>
@@ -202,6 +209,14 @@ function App() {
                       <strong>Missing terms:</strong>{' '}
                       {grade.missingTerms.length ? grade.missingTerms.join(', ') : 'none'}
                     </p>
+                    {grade.llmJudge ? (
+                      <p>
+                        <strong>LLM judge:</strong>{' '}
+                        {grade.llmJudge.error
+                          ? `failed: ${grade.llmJudge.error}`
+                          : `${grade.llmJudge.rationale || 'no rationale'} `}
+                      </p>
+                    ) : null}
                   </div>
                   <details>
                     <summary>Retrieved evidence</summary>

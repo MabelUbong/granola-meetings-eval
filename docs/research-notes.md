@@ -14,8 +14,9 @@ Adaptation for this take-home:
 - The strongest harness is an OpenAI semantic RAG arm: lexical candidate generation, embedding reranking, context packing, and model-backed answer synthesis.
 - Every answer stores JSON trace steps for query interpretation, retrieval, and generation.
 - The deterministic grader scores evidence recall, expected-term coverage, citation recall, tool-step success, step completeness, and latency.
+- An optional OpenAI LLM-as-judge pass scores semantic correctness, citation faithfulness, completeness, and hallucination risk while staying separate from the deterministic score for repeatability.
 - Cases include exact lookup, latest/temporal lookup, cross-meeting synthesis, account-summary retrieval, product-feedback synthesis, and insufficient-evidence behavior.
-- The default answerer is extractive for repeatability. An OpenAI-backed answerer can be enabled with `--llm` without changing the eval set or grader.
+- The default answerer is extractive for repeatability. An OpenAI-backed answerer can be enabled with `--llm`, and an OpenAI-backed judge can be enabled with `--judge`, without changing the eval set.
 
 Optimization pass:
 
@@ -35,4 +36,4 @@ Relevant public directions:
 - Agent/process benchmarks such as ToolEval-style and AgentProcessBench-style work emphasize step-level diagnosis for tool-using systems. This harness records query interpretation, retrieval/tool parameters, generation mode, success flags, latency, token estimates, and costs for each case.
 - Recent hybrid retrieval and RAG-search work continues to use lexical retrieval as a strong baseline while comparing dense or semantic reranking, corrective retrieval, and larger context budgets. The `openai_semantic_hybrid` arm follows that pattern: BM25 candidate generation, OpenAI embedding rerank, and model-backed synthesis with citations.
 
-Conclusion: the implementation is well-shaped for the take-home benchmark and intentionally more diagnostic than a single end-to-end judge score. It is not theoretically optimal. The highest-value extensions are a stronger semantic claim-to-citation judge, multi-turn cases, conflict/newer-evidence rubrics, and running the OpenAI semantic arm from an unrestricted network.
+Conclusion: the implementation is well-shaped for the take-home benchmark and intentionally more diagnostic than a single end-to-end judge score. It is not theoretically optimal. The highest-value extensions are multi-turn cases, conflict/newer-evidence rubrics, calibrated judge prompts over a larger human-labeled sample, and running the OpenAI semantic arm from an unrestricted network.
