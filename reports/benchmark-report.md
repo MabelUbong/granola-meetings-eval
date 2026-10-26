@@ -1,6 +1,6 @@
 # Granola Meetings Agent Benchmark Report
 
-Generated: 2026-10-26T18:06:30.634Z
+Generated: 2026-10-26T18:17:55.567Z
 
 ## Abstract
 
@@ -12,7 +12,12 @@ The grader intentionally separates evidence recall, answer coverage, citation be
 
 ## Harnesses Tested
 
-- OpenAI Semantic Hybrid (`openai_semantic_hybrid`): Uses BM25 as candidate generation, OpenAI embeddings for semantic reranking, and an OpenAI model to synthesize the final answer with citations.
+- Notes BM25 (`notes_bm25`): Searches only Granola titles, lists, attendees, and generated notes. This is cheap and fast, but misses details only present in raw transcript.
+- Compact Hybrid BM25 (`compact_hybrid_bm25`): Searches notes and transcripts but keeps a tight, diversified context window. This tests whether a compact agent loop can stay grounded without flooding the model/context.
+- Hybrid Transcript BM25 (`hybrid_transcript_bm25`): Searches metadata/notes plus overlapping transcript chunks, then packs diversified evidence into the answer context.
+- Wide Context Hybrid BM25 (`wide_context_hybrid_bm25`): Gives the agent a larger transcript window and allows more chunks per meeting. This tests recall gains against longer context, more tokens, and more citation noise.
+- Recency Weighted Hybrid BM25 (`recency_weighted_hybrid_bm25`): Uses the same local tools as the balanced hybrid harness, but increases recency weighting for latest/current-style questions.
+- Vector DB + BM25 RAG (`local_vector_database_rag`): Indexes notes and transcript chunks into a local vector database, fuses cosine similarity with BM25 candidates, and answers with the same deterministic grounded synthesizer.
 
 These are harness comparisons rather than only model comparisons. The default offline harnesses keep the answerer deterministic and vary the surrounding agent system: tool policy, orchestration loop, context packing, recency handling, and prompt/grounding policy. The OpenAI semantic harness is optional because it adds network dependency and model variance.
 
@@ -20,30 +25,40 @@ These are harness comparisons rather than only model comparisons. The default of
 
 | Harness | Orchestration / loop | Context management | Tools / execution | Prompt / answer policy |
 | --- | --- | --- | --- | --- |
-| OpenAI Semantic Hybrid | Two-stage retrieval loop: BM25 candidate generation, embedding rerank, then model synthesis. | Semantic-reranked hybrid context, top 10 results, up to two chunks per meeting, 16k character budget. | Local BM25 candidate generation plus OpenAI embeddings and OpenAI answer synthesis. | Model-backed synthesis prompt constrained to supplied evidence and bracketed meeting-id citations. |
+| Notes BM25 | Single retrieval pass over notes, then deterministic grounded synthesis. | Notes-only context, one document per meeting, small context budget. | Local BM25 retrieval only; no network or model dependency. | Strict extractive answer with meeting-id citations and explicit uncertainty. |
+| Compact Hybrid BM25 | Single retrieval pass with aggressive meeting diversification before synthesis. | Hybrid notes/transcript context, top 6 results, one chunk per meeting, 7k character budget. | Local BM25 retrieval over notes plus transcript chunks. | Strict extractive answer with short evidence snippets and meeting-id citations. |
+| Hybrid Transcript BM25 | Single retrieval pass over notes and transcript chunks, then deterministic grounded synthesis. | Balanced hybrid context, top 12 results, up to two chunks per meeting, 14k character budget. | Local BM25 retrieval over notes plus transcript chunks. | Strict extractive answer with meeting-id citations and explicit uncertainty. |
+| Wide Context Hybrid BM25 | Single retrieval pass with a high-recall context packer. | Wide hybrid context, top 18 results, up to three chunks per meeting, 24k character budget. | Local BM25 retrieval over notes plus transcript chunks. | Strict extractive answer, but with broader evidence available for multi-meeting synthesis. |
+| Recency Weighted Hybrid BM25 | Temporal-aware retrieval pass that boosts newer meetings when the query asks for latest/current state. | Balanced hybrid context with stronger temporal ranking and a 14k character budget. | Local BM25 retrieval over notes plus transcript chunks with temporal metadata boost. | Strict extractive answer with meeting-id citations and explicit uncertainty. |
+| Vector DB + BM25 RAG | Hybrid retrieval pass that fuses local vector database search with BM25, then deterministic grounded synthesis. | Hybrid notes/transcript vector index, top 12 results, up to two chunks per meeting, 14k character budget. | Local vector database retrieval plus BM25 candidate fusion; no external vector service required. | Strict extractive answer with meeting-id citations and explicit uncertainty. |
 
 ## Results
 
 | Harness | Avg score | LLM judge | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OpenAI Semantic Hybrid | 0.774 | n/a | 98% | 41% | 98% | 27% | 0% | 100% | 34281 | $0.0058 | 5005 ms |
+| Notes BM25 | 0.798 | n/a | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 147 ms |
+| Compact Hybrid BM25 | 0.740 | n/a | 85% | 45% | 85% | 32% | 0% | 100% | 3516 | $0.0000 | 2559 ms |
+| Hybrid Transcript BM25 | 0.795 | n/a | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2629 ms |
+| Wide Context Hybrid BM25 | 0.802 | n/a | 100% | 48% | 90% | 35% | 0% | 100% | 9229 | $0.0000 | 2721 ms |
+| Recency Weighted Hybrid BM25 | 0.795 | n/a | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 2702 ms |
+| Vector DB + BM25 RAG | 0.787 | n/a | 95% | 48% | 90% | 36% | 0% | 100% | 6339 | $0.0000 | 2907 ms |
 
-Best overall: OpenAI Semantic Hybrid at 0.774.
+Best overall: Wide Context Hybrid BM25 at 0.802.
 
 ## Case-Level Scores
 
 | Case | Category | Difficulty | Query | Scores |
 | --- | --- | --- | --- | --- |
-| deepgram_pricing_capacity_evolution | cross-meeting synthesis | hard | How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks? | openai_semantic_hybrid: 0.702 |
-| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | openai_semantic_hybrid: 0.660 |
-| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | openai_semantic_hybrid: 0.934 |
-| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | openai_semantic_hybrid: 0.648 |
-| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | openai_semantic_hybrid: 0.752 |
-| latest_standup_launch_blockers | temporal retrieval | medium | What were the action items and launch blockers in the latest standup? | openai_semantic_hybrid: 0.798 |
-| ramp_enterprise_terms | sales retrieval | easy | What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed? | openai_semantic_hybrid: 0.824 |
-| kraken_procurement_readiness | sales retrieval | easy | What procurement and security requirements did Kraken raise before broader Granola rollout? | openai_semantic_hybrid: 0.819 |
-| plus_capital_compliance_followup | sales/compliance synthesis | medium | What compliance needs did Plus Capital have, and how did the follow-up change the product ask? | openai_semantic_hybrid: 0.836 |
-| salesforce_pricing_insufficient_evidence | ambiguity and grounding | hard | What did Patrick from Salesforce agree to pay for Granola? | openai_semantic_hybrid: 0.770 |
+| deepgram_pricing_capacity_evolution | cross-meeting synthesis | hard | How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks? | notes_bm25: 0.753; compact_hybrid_bm25: 0.710; hybrid_transcript_bm25: 0.753; wide_context_hybrid_bm25: 0.753; recency_weighted_hybrid_bm25: 0.753; local_vector_database_rag: 0.753 |
+| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | notes_bm25: 0.835; compact_hybrid_bm25: 0.873; hybrid_transcript_bm25: 0.873; wide_context_hybrid_bm25: 0.835; recency_weighted_hybrid_bm25: 0.873; local_vector_database_rag: 0.873 |
+| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | notes_bm25: 0.975; compact_hybrid_bm25: 0.680; hybrid_transcript_bm25: 0.943; wide_context_hybrid_bm25: 0.943; recency_weighted_hybrid_bm25: 0.943; local_vector_database_rag: 0.943 |
+| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | notes_bm25: 0.661; compact_hybrid_bm25: 0.661; hybrid_transcript_bm25: 0.741; wide_context_hybrid_bm25: 0.821; recency_weighted_hybrid_bm25: 0.741; local_vector_database_rag: 0.661 |
+| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | notes_bm25: 0.755; compact_hybrid_bm25: 0.729; hybrid_transcript_bm25: 0.735; wide_context_hybrid_bm25: 0.763; recency_weighted_hybrid_bm25: 0.735; local_vector_database_rag: 0.735 |
+| latest_standup_launch_blockers | temporal retrieval | medium | What were the action items and launch blockers in the latest standup? | notes_bm25: 0.798; compact_hybrid_bm25: 0.798; hybrid_transcript_bm25: 0.798; wide_context_hybrid_bm25: 0.798; recency_weighted_hybrid_bm25: 0.798; local_vector_database_rag: 0.798 |
+| ramp_enterprise_terms | sales retrieval | easy | What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed? | notes_bm25: 0.824; compact_hybrid_bm25: 0.824; hybrid_transcript_bm25: 0.824; wide_context_hybrid_bm25: 0.824; recency_weighted_hybrid_bm25: 0.824; local_vector_database_rag: 0.824 |
+| kraken_procurement_readiness | sales retrieval | easy | What procurement and security requirements did Kraken raise before broader Granola rollout? | notes_bm25: 0.776; compact_hybrid_bm25: 0.776; hybrid_transcript_bm25: 0.776; wide_context_hybrid_bm25: 0.776; recency_weighted_hybrid_bm25: 0.776; local_vector_database_rag: 0.776 |
+| plus_capital_compliance_followup | sales/compliance synthesis | medium | What compliance needs did Plus Capital have, and how did the follow-up change the product ask? | notes_bm25: 0.836; compact_hybrid_bm25: 0.579; hybrid_transcript_bm25: 0.739; wide_context_hybrid_bm25: 0.739; recency_weighted_hybrid_bm25: 0.739; local_vector_database_rag: 0.739 |
+| salesforce_pricing_insufficient_evidence | ambiguity and grounding | hard | What did Patrick from Salesforce agree to pay for Granola? | notes_bm25: 0.770; compact_hybrid_bm25: 0.770; hybrid_transcript_bm25: 0.770; wide_context_hybrid_bm25: 0.770; recency_weighted_hybrid_bm25: 0.770; local_vector_database_rag: 0.770 |
 
 ## Discussion
 
@@ -89,9 +104,12 @@ Each result includes estimated prompt tokens, completion tokens, embedding token
 
 ## Notable Failures
 
-- openai_semantic_hybrid on deepgram_pricing_capacity_evolution: score 0.702. Missing evidence: none. Weak citation spans: 69496ba5-5315-4b03-b589-df4ee3750ba6, 72454729-0f61-42db-a213-012bb765892b. Missing terms: $218k, $0.13, Nova 3, 5M hours, 17-18,000, TCO. Query: How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks?
-- openai_semantic_hybrid on aws_api_gateway_streaming: score 0.660. Missing evidence: none. Weak citation spans: 567e57e3-4e8b-4094-a7cd-f54aec239b24. Missing terms: 80 AWS Lambdas, single entry point, HTTP streaming, proxy integration, chunked transfer, 30-minute, 10MB. Query: What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming?
-- openai_semantic_hybrid on ios_feedback_recurring_requests: score 0.648. Missing evidence: 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, d60975a6-5a5d-46a6-80d4-d5c79e438489, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: phone on table, AirPods, real-time transcript, Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
+- notes_bm25 on ios_feedback_recurring_requests: score 0.661. Missing evidence: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
+- compact_hybrid_bm25 on deepgram_pricing_capacity_evolution: score 0.710. Missing evidence: none. Weak citation spans: 69496ba5-5315-4b03-b589-df4ee3750ba6, 72454729-0f61-42db-a213-012bb765892b. Missing terms: $218k, $0.13, Nova 3, 5M hours, 17-18,000, TCO. Query: How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks?
+- compact_hybrid_bm25 on workspace_privacy_design_themes: score 0.680. Missing evidence: 7e8377b5-9153-475e-bcc2-e8ef4afd0fee, d87cc517-beb9-4d68-bce8-2bf07a6ccd37. Weak citation spans: 7e8377b5-9153-475e-bcc2-e8ef4afd0fee, d87cc517-beb9-4d68-bce8-2bf07a6ccd37. Missing terms: public, professional. Query: Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces?
+- compact_hybrid_bm25 on ios_feedback_recurring_requests: score 0.661. Missing evidence: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
+- compact_hybrid_bm25 on plus_capital_compliance_followup: score 0.579. Missing evidence: d74a5e93-08af-4ffe-84ec-915704104186. Weak citation spans: d74a5e93-08af-4ffe-84ec-915704104186. Missing terms: 5-year, download, hide raw transcripts, 9-10. Query: What compliance needs did Plus Capital have, and how did the follow-up change the product ask?
+- local_vector_database_rag on ios_feedback_recurring_requests: score 0.661. Missing evidence: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
 
 ## Extensions
 
