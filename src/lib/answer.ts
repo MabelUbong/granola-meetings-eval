@@ -187,9 +187,12 @@ export async function answerCase(
           contextCount: contexts.length,
           contextMeetingIds: contexts.map(context => context.meetingId),
           requestedLlm: useLlm,
+          systemPrompt: config.systemPrompt,
           promptPolicy: config.promptPolicy,
           orchestrationPolicy: config.orchestrationPolicy,
           contextPolicy: config.contextPolicy,
+          memoryPolicy: config.memoryPolicy,
+          toolDefinitions: config.toolDefinitions,
         },
         output: {
           answerChars: answer.length,

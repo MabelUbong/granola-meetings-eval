@@ -48,8 +48,13 @@ async function main(): Promise<void> {
         input: {
           query: testCase.query,
           configId: config.id,
+          systemPrompt: config.systemPrompt,
           promptPolicy: config.promptPolicy,
           orchestrationPolicy: config.orchestrationPolicy,
+          memoryPolicy: config.memoryPolicy,
+          sandboxPolicy: config.sandboxPolicy,
+          approvalPolicy: config.approvalPolicy,
+          loggingPolicy: config.loggingPolicy,
         },
         output: {
           category: testCase.category,
@@ -58,6 +63,7 @@ async function main(): Promise<void> {
           expectedRetrievalShape:
             testCase.requiredEvidence.length > 1 ? 'multi_meeting' : 'single_or_latest_meeting',
           contextPolicy: config.contextPolicy,
+          toolDefinitions: config.toolDefinitions,
           toolPolicy: config.toolPolicy,
         },
       };
@@ -87,7 +93,10 @@ async function main(): Promise<void> {
           source: config.source,
           retrievalStrategy: config.retrievalStrategy,
           contextPolicy: config.contextPolicy,
+          toolDefinitions: config.toolDefinitions,
           toolPolicy: config.toolPolicy,
+          sandboxPolicy: config.sandboxPolicy,
+          approvalPolicy: config.approvalPolicy,
           embeddingModel: config.embeddingModel,
           candidatePool: config.candidatePool,
           topK: config.topK,

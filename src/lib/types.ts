@@ -14,10 +14,16 @@ export type HarnessConfig = {
   id: string;
   label: string;
   description: string;
+  systemPrompt: string;
+  toolDefinitions: string[];
   promptPolicy: string;
   orchestrationPolicy: string;
   contextPolicy: string;
+  memoryPolicy: string;
+  sandboxPolicy: string;
+  approvalPolicy: string;
   toolPolicy: string;
+  loggingPolicy: string;
   source: CorpusSource;
   retrievalStrategy: 'bm25' | 'local_vector_database' | 'openai_embeddings';
   answerStrategy: 'extractive' | 'openai';

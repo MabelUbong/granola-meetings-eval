@@ -32,9 +32,13 @@ export function renderMarkdownReport(run: BenchmarkRun): string {
   const harnessDesignRows = run.configs
     .map(
       config =>
-        `| ${config.label} | ${tableCell(config.orchestrationPolicy)} | ${tableCell(
+        `| ${config.label} | ${tableCell(config.systemPrompt)} | ${tableCell(
+          config.toolDefinitions.join('<br>'),
+        )} | ${tableCell(config.orchestrationPolicy)} | ${tableCell(
           config.contextPolicy,
-        )} | ${tableCell(config.toolPolicy)} | ${tableCell(config.promptPolicy)} |`,
+        )} | ${tableCell(config.memoryPolicy)} | ${tableCell(config.sandboxPolicy)} | ${tableCell(
+          config.approvalPolicy,
+        )} | ${tableCell(config.loggingPolicy)} | ${tableCell(config.promptPolicy)} |`,
     )
     .join('\n');
 
@@ -82,12 +86,12 @@ ${run.configs
   .map(config => `- ${config.label} (\`${config.id}\`): ${config.description}`)
   .join('\n')}
 
-These are harness comparisons rather than only model comparisons. The default offline harnesses keep the answerer deterministic and vary the surrounding agent system: tool policy, orchestration loop, context packing, recency handling, and prompt/grounding policy. The OpenAI semantic harness is optional because it adds network dependency and model variance.
+These are agent-harness comparisons rather than only model comparisons. The default offline runs keep the answerer deterministic and vary the surrounding agent system: system prompt, tool definitions, orchestration loop, context packing, memory boundary, sandbox/approval policy, logging, recency handling, and prompt/grounding policy. The OpenAI semantic harness is optional because it adds network dependency and model variance.
 
-### Harness Design Matrix
+### Agent Harness Design Matrix
 
-| Harness | Orchestration / loop | Context management | Tools / execution | Prompt / answer policy |
-| --- | --- | --- | --- | --- |
+| Harness | System prompt | Tool definitions | Orchestration / loop | Context management | Memory | Sandbox | Approvals | Logging | Prompt / answer policy |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${harnessDesignRows}
 
 ## Results
@@ -106,15 +110,15 @@ ${caseRows}
 
 ## Discussion
 
-The benchmark is deliberately small, but the cases stress different failure modes. Notes-only retrieval should do well when Granola's generated notes already contain the answer, while transcript search should recover details that were omitted or phrased differently in notes. Compact, balanced, wide-context, and recency-weighted harnesses test whether the surrounding agent loop improves results without changing model weights. Temporal cases test whether a harness recognizes "latest" as an ordering constraint instead of a lexical keyword. Cross-meeting cases test diversification: returning six chunks from one meeting is usually worse than returning one strong chunk from each relevant meeting.
+The benchmark is deliberately small, but the cases stress different failure modes. Notes-only retrieval should do well when Granola's generated notes already contain the answer, while transcript search should recover details that were omitted or phrased differently in notes. Compact, balanced, wide-context, recency-weighted, and vector-RAG harnesses test whether the surrounding agent loop improves results without changing model weights. Temporal cases test whether a harness recognizes "latest" as an ordering constraint instead of a lexical keyword. Cross-meeting cases test diversification: returning six chunks from one meeting is usually worse than returning one strong chunk from each relevant meeting.
 
 The current default run uses deterministic extractive answering so the benchmark is repeatable without an API key. When \`OPENAI_API_KEY\` is set, the same harness can run model-backed answering; the deterministic grader remains the same so retrieval and model changes are comparable. Passing \`--judge\` adds an OpenAI LLM-as-judge pass that scores semantic correctness, citation faithfulness, completeness, and hallucination risk as secondary diagnostics.
 
 Each result row includes a trace with:
 
 - \`interpret_query\`: query category, difficulty, temporal intent, and expected retrieval shape.
-- \`retrieve_context\`: retrieval strategy, context policy, tool policy, context budget, returned meeting IDs, chunk types, and scores.
-- \`generate_answer_*\`: whether the answer used an LLM or the deterministic extractive fallback, prompt policy, citation IDs, and fallback errors if any.
+- \`retrieve_context\`: retrieval strategy, agent tool definitions, context policy, tool policy, sandbox/approval policy, context budget, returned meeting IDs, chunk types, and scores.
+- \`generate_answer_*\`: whether the answer used an LLM or the deterministic extractive fallback, system prompt, prompt policy, memory policy, citation IDs, and fallback errors if any.
 - \`judge_answer_with_model\`: optional LLM-as-judge scores and rationale when \`--judge\` is enabled.
 
 ## Observability and Evaluation

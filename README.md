@@ -11,7 +11,7 @@ A compact benchmark for comparing meeting-corpus agents over the provided Granol
 - sales/compliance summaries
 - unsupported-specific handling, where the right answer is to avoid inventing facts
 
-The default run compares several offline harnesses. These are not just retrieval labels; each one captures a different surrounding agent setup: tool policy, orchestration loop, context packing, recency handling, and prompt/grounding policy.
+The default run compares several offline agent harnesses. These are not just retrieval labels; each one captures the surrounding agent setup: system prompt, tool definitions, orchestration loop, context packing, memory boundary, sandbox/approval policy, logging, recency handling, and prompt/grounding policy.
 
 - `notes_bm25`: searches titles, lists, people, and generated meeting notes
 - `compact_hybrid_bm25`: searches notes plus transcripts, then aggressively compacts and diversifies the context
@@ -35,6 +35,7 @@ Online evaluation plan: `docs/online-evaluation.md` defines A/B arms, event sche
 ## Code Structure
 
 - `src/cli/`: command-line entry points for ingesting data, running evals, rendering reports, creating human-review samples, and checking regressions
+- `src/lib/configs.ts`: agent-harness definitions, including system prompt, tools, loop, context, memory, sandbox, approvals, and logging policy
 - `src/lib/retrieval.ts`: local BM25 retrieval over notes and transcript chunks
 - `src/lib/vectorDatabase.ts`: local vector database retrieval over notes and transcript chunks
 - `src/lib/semanticRetrieval.ts`: OpenAI embedding rerank for the semantic RAG harness

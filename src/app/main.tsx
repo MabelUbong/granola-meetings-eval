@@ -643,9 +643,15 @@ function App() {
                       </div>
                       <p>{config.description}</p>
                       <div className="policy-list" aria-label={`${config.label} harness policies`}>
+                        <span>System: {config.systemPrompt}</span>
+                        <span>Tools: {config.toolDefinitions.join(' / ')}</span>
                         <span>{config.orchestrationPolicy}</span>
                         <span>{config.contextPolicy}</span>
+                        <span>{config.memoryPolicy}</span>
+                        <span>{config.sandboxPolicy}</span>
+                        <span>{config.approvalPolicy}</span>
                         <span>{config.toolPolicy}</span>
+                        <span>{config.loggingPolicy}</span>
                       </div>
                     </div>
                     <div className="answer-score">
