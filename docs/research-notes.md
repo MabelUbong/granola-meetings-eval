@@ -6,7 +6,7 @@ This benchmark borrows from a few established patterns for evaluating tool-using
 - ToolEval / T-Eval / ToolBench-style step evaluation: judge whether the agent chose the right tool or retrieval operation, used sensible arguments, and produced the right final answer.
 - DeepEval-style RAG evaluation: separate context relevance, answer correctness, and faithfulness/grounding.
 - Evidently-style observability: store structured traces and aggregate error patterns over time.
-- Internal MM2Bench meeting-notes EvalSpecs: keep compact prompts, atomic rubric checks, and intentional no-evidence cases where the right behavior is to flag a gap.
+- Meeting-notes eval design patterns: keep compact prompts, atomic rubric checks, and intentional no-evidence cases where the right behavior is to flag a gap.
 
 Adaptation for this take-home:
 

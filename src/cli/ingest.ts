@@ -9,12 +9,12 @@ async function main(): Promise<void> {
   const transcriptsPath = argString(
     args,
     'transcripts',
-    envPath('TRANSCRIPTS_PATH', '/tmp/vscode-paste/2026-10-25T14-15-28_86f275_transcripts.json'),
+    envPath('TRANSCRIPTS_PATH', 'data/raw/transcripts.json'),
   );
   const metadataPath = argString(
     args,
     'metadata',
-    envPath('METADATA_PATH', '/tmp/vscode-paste/2026-10-25T14-15-38_124e8d_data.json'),
+    envPath('METADATA_PATH', 'data/raw/data.json'),
   );
   const outPath = argString(args, 'out', envPath('PROCESSED_MEETINGS_PATH', 'data/processed/meetings.json'));
 

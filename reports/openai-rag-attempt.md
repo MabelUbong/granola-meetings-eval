@@ -12,7 +12,7 @@ It uses:
 Command:
 
 ```bash
-/usr/bin/npm run eval:openai
+npm run eval:openai
 ```
 
 Current environment result:

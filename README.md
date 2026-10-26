@@ -31,51 +31,54 @@ Online evaluation plan: `docs/online-evaluation.md` defines A/B arms, event sche
 ## Setup
 
 ```bash
-/usr/bin/npm install --registry https://registry.x2p.facebook.net/
+npm install
 cp .env.example .env.local
+mkdir -p data/raw
+cp /path/to/transcripts.json data/raw/transcripts.json
+cp /path/to/data.json data/raw/data.json
 ```
 
-Set `OPENAI_API_KEY` in `.env.local` only if you want model-backed answering.
+The default paths in `.env.local` point at `data/raw/transcripts.json` and `data/raw/data.json`. Override them if you keep the provided files elsewhere. Set `OPENAI_API_KEY` only if you want model-backed answering.
 
 ## Run
 
 ```bash
-/usr/bin/npm run build:cli
-/usr/bin/npm run ingest
-/usr/bin/npm run eval
-/usr/bin/npm run report
-/usr/bin/npm run human-review
-/usr/bin/npm run check-regressions
+npm run build:cli
+npm run ingest
+npm run eval
+npm run report
+npm run human-review
+npm run check-regressions
 ```
 
 Or run the core benchmark/report pipeline:
 
 ```bash
-/usr/bin/npm run prepare-data
+npm run prepare-data
 ```
 
 Run one config:
 
 ```bash
-/usr/bin/npm run eval -- --config hybrid_transcript_bm25
+npm run eval -- --config hybrid_transcript_bm25
 ```
 
 Run with an OpenAI-backed answerer:
 
 ```bash
-/usr/bin/npm run eval -- --llm
+npm run eval -- --llm
 ```
 
 Run the OpenAI semantic RAG harness:
 
 ```bash
-/usr/bin/npm run eval:openai
+npm run eval:openai
 ```
 
 Run all harnesses, including OpenAI semantic RAG:
 
 ```bash
-/usr/bin/npm run eval:all
+npm run eval:all
 ```
 
 The RAG harness requires outbound access to `api.openai.com`. In restricted environments where that hostname cannot resolve, the offline harnesses still run and the OpenAI harness can be rerun unchanged from a normal network.
@@ -83,7 +86,7 @@ The RAG harness requires outbound access to `api.openai.com`. In restricted envi
 ## Dashboard
 
 ```bash
-/usr/bin/npm run dev
+npm run dev
 ```
 
 Open the Vite URL and inspect aggregate scores, per-case answers, retrieved evidence, and missing rubric terms.
