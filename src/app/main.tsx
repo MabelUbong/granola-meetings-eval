@@ -306,6 +306,7 @@ function App() {
   }, []);
 
   const selectedCase = run?.cases.find(testCase => testCase.id === selectedCaseId) || run?.cases[0];
+  const isPublicRedacted = Boolean(run?.publicView?.redacted);
 
   const derived = useMemo(() => {
     if (!run) {
@@ -411,6 +412,7 @@ function App() {
             {formatNumber(run.cases.length)} cases across {formatNumber(run.dataset.meetingCount)} meetings
             and {formatNumber(run.dataset.transcriptCount)} transcripts.
           </p>
+          {isPublicRedacted ? <p className="privacy-note">{run.publicView?.note}</p> : null}
         </div>
         <div className="run-meta" aria-label="Run metadata">
           <span>Generated {formatDateTime(run.generatedAt)}</span>
@@ -576,18 +578,25 @@ function App() {
 
           <div className="evidence-panel">
             <div className="panel-heading">
-              <h3>Required evidence</h3>
+              <h3>{isPublicRedacted ? 'Required evidence summary' : 'Required evidence'}</h3>
               <span>{selectedCase.requiredEvidence.length} meetings</span>
             </div>
-            <div className="evidence-grid">
-              {selectedCase.requiredEvidence.map(evidence => (
-                <article className="evidence-item" key={evidence.meetingId}>
-                  <strong>{evidence.title}</strong>
-                  <p>{evidence.snippet}</p>
-                  <code>{evidence.meetingId}</code>
-                </article>
-              ))}
-            </div>
+            {isPublicRedacted ? (
+              <p className="redacted-copy">
+                Exact evidence snippets and meeting IDs are redacted in the online view. The scoring still uses the
+                private evidence set from the local benchmark run.
+              </p>
+            ) : (
+              <div className="evidence-grid">
+                {selectedCase.requiredEvidence.map(evidence => (
+                  <article className="evidence-item" key={evidence.meetingId}>
+                    <strong>{evidence.title}</strong>
+                    <p>{evidence.snippet}</p>
+                    <code>{evidence.meetingId}</code>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="answers-headline">
@@ -689,20 +698,30 @@ function App() {
                   </div>
 
                   <div className="answer-accordions">
-                    <details>
-                      <summary>Retrieved evidence ({answer.contexts.length})</summary>
-                      <ol>
-                        {answer.contexts.map(context => (
-                          <li key={context.docId}>
-                            <strong>
-                              {context.title} ({context.kind}, {context.score.toFixed(2)})
-                            </strong>
-                            <span>{context.snippet}</span>
-                            <code>{context.meetingId}</code>
-                          </li>
-                        ))}
-                      </ol>
-                    </details>
+                    {isPublicRedacted ? (
+                      <details>
+                        <summary>Retrieved evidence redacted</summary>
+                        <p className="redacted-copy">
+                          The online dashboard removes retrieved snippets, meeting IDs, and citation text while keeping
+                          the scored metrics.
+                        </p>
+                      </details>
+                    ) : (
+                      <details>
+                        <summary>Retrieved evidence ({answer.contexts.length})</summary>
+                        <ol>
+                          {answer.contexts.map(context => (
+                            <li key={context.docId}>
+                              <strong>
+                                {context.title} ({context.kind}, {context.score.toFixed(2)})
+                              </strong>
+                              <span>{context.snippet}</span>
+                              <code>{context.meetingId}</code>
+                            </li>
+                          ))}
+                        </ol>
+                      </details>
+                    )}
                     <details>
                       <summary>Trace steps ({answer.steps.length})</summary>
                       <ol>

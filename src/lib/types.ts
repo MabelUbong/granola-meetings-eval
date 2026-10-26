@@ -165,6 +165,11 @@ export type ConfigSummary = {
 };
 
 export type BenchmarkRun = {
+  publicView?: {
+    redacted: boolean;
+    note: string;
+    sourceReport: string;
+  };
   generatedAt: string;
   dataset: {
     meetingCount: number;
