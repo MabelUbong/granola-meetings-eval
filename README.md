@@ -121,6 +121,8 @@ The RAG harness requires outbound access to `api.openai.com`. In restricted envi
 npm run dev
 ```
 
+The deployment dashboard serves the full benchmark result from `public/results/latest-results.json`, including answer text, retrieved evidence snippets, citations, and trace metadata. Keep the GitHub repo and deployment link limited to the Granola reviewers.
+
 Open the Vite URL and inspect aggregate scores, per-case answers, retrieved evidence, and missing rubric terms.
 
 ## Vercel Deployment
