@@ -1,0 +1,217 @@
+[
+  {
+    "id": "deepgram_pricing_capacity_evolution",
+    "category": "cross-meeting synthesis",
+    "difficulty": "hard",
+    "query": "How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks?",
+    "expectedBehavior": "Compare the October contract/pricing sync with February capacity and concurrency discussions. Mention the rate/commitment, Nova 3, language needs, high concurrency projections, and TCO follow-up.",
+    "requiredEvidence": [
+      {
+        "meetingId": "69496ba5-5315-4b03-b589-df4ee3750ba6",
+        "title": "Deepgram + Granola Sync",
+        "snippet": "Term is 12 months with a commitment of $218k; Granola requested a $0.13 per hour option with higher commitment."
+      },
+      {
+        "meetingId": "72454729-0f61-42db-a213-012bb765892b",
+        "title": "Deepgram / Granola Sync",
+        "snippet": "Need languages support, no rate limiting, 5M hours capacity, Nova 3 access, and 17-18,000 concurrent streams currently."
+      },
+      {
+        "meetingId": "cb82b58a-7ab7-44a4-9111-548b3182a2d5",
+        "title": "Granola + Deepgram | Sync",
+        "snippet": "Guaranteed capacity: 17,261 concurrent streams; Deepgram to provide TCO analysis based on 50 million hours projection."
+      }
+    ],
+    "expectedTerms": ["$218k", "$0.13", "Nova 3", "5M hours", "17-18,000", "17,261", "TCO"],
+    "rationale": "Tests lateral synthesis over repeated partner calls where the newer meetings add capacity constraints not present in the older pricing sync."
+  },
+  {
+    "id": "aws_api_gateway_streaming",
+    "category": "single-meeting technical retrieval",
+    "difficulty": "medium",
+    "query": "What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming?",
+    "expectedBehavior": "Explain the current Lambda URL problem, alternatives considered, and the specific API Gateway streaming guidance and limits.",
+    "requiredEvidence": [
+      {
+        "meetingId": "567e57e3-4e8b-4094-a7cd-f54aec239b24",
+        "title": "Call on Serverless + API Gateway | AWS-Granola",
+        "snippet": "API Gateway streaming is possible with proxy integration and chunked transfer headers, limited to 30-minute connections and 10MB payloads."
+      }
+    ],
+    "expectedTerms": ["80 AWS Lambdas", "single entry point", "HTTP streaming", "proxy integration", "chunked transfer", "30-minute", "10MB"],
+    "rationale": "Tests precise technical retrieval with several nearby alternatives that could be confused."
+  },
+  {
+    "id": "workspace_privacy_design_themes",
+    "category": "product feedback synthesis",
+    "difficulty": "hard",
+    "query": "Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces?",
+    "expectedBehavior": "Synthesize repeated workspace concerns across several user interviews rather than overfitting to one meeting.",
+    "requiredEvidence": [
+      {
+        "meetingId": "1557e3dd-50c6-4ab3-b6f6-01d5905bbac1",
+        "title": "Concerns About Workspace Design",
+        "snippet": "Initial user experience might feel awkward; lack of obvious ownership/presence; need to clarify ownership model."
+      },
+      {
+        "meetingId": "1689ee89-b60f-4e81-969d-020a5cd8f457",
+        "title": "James workspace feedback",
+        "snippet": "Need clearer indication of team vs personal spaces and visibility into team activity."
+      },
+      {
+        "meetingId": "7e8377b5-9153-475e-bcc2-e8ef4afd0fee",
+        "title": "Sukh Workspace feedback",
+        "snippet": "Not clear what was shared vs not in workspace; concern about whether teammates can see this; need explicit privacy indicators."
+      },
+      {
+        "meetingId": "d87cc517-beb9-4d68-bce8-2bf07a6ccd37",
+        "title": "Andy Workspace feedback",
+        "snippet": "Need clearer separation between private, public, and professional team access layers."
+      }
+    ],
+    "expectedTerms": ["ownership", "presence", "team vs personal", "privacy", "shared", "private", "public", "professional"],
+    "rationale": "Tests multi-document diversification and synthesis over user research notes with overlapping language."
+  },
+  {
+    "id": "ios_feedback_recurring_requests",
+    "category": "product feedback synthesis",
+    "difficulty": "hard",
+    "query": "What themes kept coming up in iOS app feedback, and which requests looked most actionable?",
+    "expectedBehavior": "Summarize repeated iOS usage patterns and concrete requests across several user calls.",
+    "requiredEvidence": [
+      {
+        "meetingId": "5c6cf2b4-8b88-4917-b103-a1087a31a1a8",
+        "title": "iOS App Feedback between Jonathan Mendoza and Ryan Fowler",
+        "snippet": "Live Activities were appreciated, but manual note handling needed improvement."
+      },
+      {
+        "meetingId": "eeaa7f47-c867-40d8-b182-1798327ec43b",
+        "title": "iOS App Feedback between Jonathan Mendoza and Lee Fuhr",
+        "snippet": "Used Granola for in-person 1:1 meetings with phone on table and valued accurate summaries."
+      },
+      {
+        "meetingId": "d60975a6-5a5d-46a6-80d4-d5c79e438489",
+        "title": "iOS App Feedback between Jonathan Mendoza and Amir Shneider",
+        "snippet": "Could not record while using AirPods, wanted real-time transcript, Apple Notes integration, and Hebrew support."
+      },
+      {
+        "meetingId": "9a690f35-b543-4d68-817b-d8bdb1a06c3f",
+        "title": "iOS App Feedback between Jonathan Mendoza and Mike Hillenmeyer",
+        "snippet": "Primary use case was walk-and-talk personal notes; team also copied notes into Coda and used Slack integration."
+      }
+    ],
+    "expectedTerms": ["Live Activities", "manual notes", "phone on table", "AirPods", "real-time transcript", "Apple Notes", "walk and talk"],
+    "rationale": "Tests cross-call product coaching rather than one-shot factual lookup."
+  },
+  {
+    "id": "oncall_handover_recurring_incidents",
+    "category": "operations retrieval",
+    "difficulty": "medium",
+    "query": "What issues should the next on-call engineer watch based on the March on-call handovers?",
+    "expectedBehavior": "Retrieve the March handovers and list recurring alerts, incidents, metrics, and escalation expectations.",
+    "requiredEvidence": [
+      {
+        "meetingId": "39aab9b3-ceb8-44d0-8247-72e56659d56c",
+        "title": "On-Call Handover",
+        "snippet": "Avatar API credit alert, disabled Secrets Manager alarm, Slack threshold changes, Zod failures for email with percent sign, Aurora and metadata Lambda issues."
+      },
+      {
+        "meetingId": "5cb18b82-03b6-4003-83f4-772286673426",
+        "title": "On-Call Handover",
+        "snippet": "Aurora ACU reached 100% utilization; Lambda errors concentrated in metadata function; Deepgram normal."
+      },
+      {
+        "meetingId": "76acc661-0ee1-4311-89de-7cb9b9621ce0",
+        "title": "On-Call Handover",
+        "snippet": "Robert Shin taking over; 9AM to 9PM hours; 30-minute response window before escalation."
+      }
+    ],
+    "expectedTerms": ["Avatar API", "Secrets Manager", "Slack alarm", "%", "Zod", "Aurora", "metadata", "9AM to 9PM"],
+    "rationale": "Tests repeated-meeting retrieval where three similar meetings should all be recognized as relevant."
+  },
+  {
+    "id": "latest_standup_launch_blockers",
+    "category": "temporal retrieval",
+    "difficulty": "medium",
+    "query": "What were the action items and launch blockers in the latest standup?",
+    "expectedBehavior": "Use recency to find the latest Standup and report launch blockers plus key updates, not an older standup.",
+    "requiredEvidence": [
+      {
+        "meetingId": "9e0d8d10-1315-4281-8199-46a8077741a5",
+        "title": "Standup",
+        "snippet": "Windows launch target set for Tuesday; blockers were transcription issues and auto-update; file upload ready; DoorDash starting enterprise free trial."
+      }
+    ],
+    "expectedTerms": ["Windows", "Tuesday", "transcription issues", "auto-update", "file upload", "DoorDash", "ChatGPT"],
+    "rationale": "Tests temporal intent and disambiguation among many identically titled standups."
+  },
+  {
+    "id": "ramp_enterprise_terms",
+    "category": "sales retrieval",
+    "difficulty": "easy",
+    "query": "What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed?",
+    "expectedBehavior": "Identify contract concessions, compliance timeline, pricing, and pending insurance requirements.",
+    "requiredEvidence": [
+      {
+        "meetingId": "659b81c4-5e11-406f-a60e-6f38314ef74f",
+        "title": "Granola <> Ramp",
+        "snippet": "Turn off training on conversations/transcripts and external sharing links; $25/user/month enterprise tier; 60-day compliance timeline; insurance pending."
+      }
+    ],
+    "expectedTerms": ["training", "external sharing links", "internal sharing", "$25/user/month", "60-day", "insurance"],
+    "rationale": "Tests concrete sales-call retrieval with pricing and compliance details."
+  },
+  {
+    "id": "kraken_procurement_readiness",
+    "category": "sales retrieval",
+    "difficulty": "easy",
+    "query": "What procurement and security requirements did Kraken raise before broader Granola rollout?",
+    "expectedBehavior": "Summarize Kraken's SSO, SOC 2, platform, billing, and license-readiness requirements.",
+    "requiredEvidence": [
+      {
+        "meetingId": "19b2d83f-ee76-47cb-a2d8-34f744239ae4",
+        "title": "Jeff (Kraken) <> Sam (Granola)",
+        "snippet": "Kraken requested Okta SSO, SOC 2 progress, Outlook support, and enterprise license agreements."
+      }
+    ],
+    "expectedTerms": ["Okta", "SOC 2", "January/February", "Google Workspace", "Outlook", "enterprise license"],
+    "rationale": "Tests a typical account-summary query."
+  },
+  {
+    "id": "plus_capital_compliance_followup",
+    "category": "sales/compliance synthesis",
+    "difficulty": "medium",
+    "query": "What compliance needs did Plus Capital have, and how did the follow-up change the product ask?",
+    "expectedBehavior": "Connect the initial RIA requirements with the later follow-up about retention, export, and hiding raw transcripts.",
+    "requiredEvidence": [
+      {
+        "meetingId": "d74a5e93-08af-4ffe-84ec-915704104186",
+        "title": "15 Min Meeting between Shreman Shrestha and Michelle Dawson",
+        "snippet": "RIA with 5-year record retention; needed transcript downloads, consent messaging, no audio/video storage, enterprise controls."
+      },
+      {
+        "meetingId": "07448f73-6890-4533-8931-65051a385e1c",
+        "title": "15 Min Meeting between Shreman Shrestha and Michelle Dawson",
+        "snippet": "Needed indefinite usage data retention, export of visible data, and requested hiding raw transcripts while keeping summaries visible."
+      }
+    ],
+    "expectedTerms": ["RIA", "5-year", "retention", "download", "export", "hide raw transcripts", "9-10"],
+    "rationale": "Tests linking two meetings with the same title and participant but different dates."
+  },
+  {
+    "id": "salesforce_pricing_insufficient_evidence",
+    "category": "ambiguity and grounding",
+    "difficulty": "hard",
+    "query": "What did Patrick from Salesforce agree to pay for Granola?",
+    "expectedBehavior": "Retrieve the Salesforce call, but say the available evidence does not establish a price Patrick agreed to pay. Do not hallucinate pricing.",
+    "requiredEvidence": [
+      {
+        "meetingId": "aa1edbce-ac09-4747-96f2-388199e54297",
+        "title": "[sam@granola.so] Sam (Granola) <> Patrick (Salesforce)",
+        "snippet": "Patrick was impressed with note-taking but had security concerns for highly sensitive meetings; no agreed pricing is captured in the notes."
+      }
+    ],
+    "expectedTerms": ["not enough evidence", "pricing", "security concerns", "sensitive meetings", "structured notes"],
+    "rationale": "Tests refusal/grounding behavior. A good agent should not invent a price just because this is a sales call."
+  }
+]

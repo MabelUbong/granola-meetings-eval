@@ -1,0 +1,32 @@
+{
+  "name": "granola-meetings-eval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Benchmark harness for evaluating meeting-corpus agents over Granola transcripts.",
+  "scripts": {
+    "build:cli": "tsc -p tsconfig.node.json",
+    "ingest": "node dist-node/cli/ingest.js",
+    "eval": "node dist-node/cli/eval.js",
+    "eval:openai": "node dist-node/cli/eval.js --config openai_semantic_hybrid --llm --out reports/openai-rag-results.json --public-out public/results/openai-rag-results.json",
+    "eval:all": "node dist-node/cli/eval.js --include-openai --llm",
+    "report": "node dist-node/cli/report.js",
+    "human-review": "node dist-node/cli/humanReview.js",
+    "check-regressions": "node dist-node/cli/regression.js",
+    "prepare-data": "/usr/bin/npm run build:cli && /usr/bin/npm run ingest && /usr/bin/npm run eval && /usr/bin/npm run report",
+    "dev": "vite --host 0.0.0.0",
+    "build": "/usr/bin/npm run build:cli && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.2.1",
+    "vite": "4.5.5",
+    "typescript": "5.4.5",
+    "@types/node": "16.18.126",
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-node/
+.vite/
+.env
+.env.local
+data/raw/
+data/processed/
+public/results/latest-results.json
+reports/*.json
