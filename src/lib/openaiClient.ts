@@ -108,6 +108,12 @@ function requireText(response: OpenAIResponse): string {
   return text;
 }
 
+function maybeAddTemperature(body: Record<string, unknown>, options: CallOpenAIOptions): void {
+  if (options.temperature !== undefined) {
+    body.temperature = options.temperature;
+  }
+}
+
 export async function callOpenAI(model: string, input: string, options: CallOpenAIOptions = {}): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -118,8 +124,8 @@ export async function callOpenAI(model: string, input: string, options: CallOpen
     const responsesBody: Record<string, unknown> = {
       model,
       input,
-      temperature: options.temperature ?? 0.1,
     };
+    maybeAddTemperature(responsesBody, options);
     if (options.jsonSchema) {
       responsesBody.text = {
         format: {
@@ -136,9 +142,9 @@ export async function callOpenAI(model: string, input: string, options: CallOpen
   } catch (responsesError) {
     const chatBody: Record<string, unknown> = {
       model,
-      temperature: options.temperature ?? 0.1,
       messages: [{role: 'user', content: input}],
     };
+    maybeAddTemperature(chatBody, options);
     if (options.jsonSchema) {
       chatBody.response_format = {
         type: 'json_schema',
