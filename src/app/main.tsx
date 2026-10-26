@@ -833,6 +833,10 @@ function TradeoffChart({
         <div>
           <p className="eyebrow">Tradeoff map</p>
           <h2>{yMetric.label} vs {xMetric.label.toLowerCase()}</h2>
+          <p className="chart-description">
+            Each numbered dot is a harness. The map shows whether better grounding is coming with slower runtime
+            or larger context.
+          </p>
         </div>
         <div className="chart-controls">
           <SegmentedControl
@@ -893,6 +897,11 @@ function TradeoffChart({
           <g
             key={point.summary.configId}
             className={point.summary.configId === selectedConfigId ? 'chart-point active' : 'chart-point'}
+            aria-label={`${point.index + 1}. ${point.summary.label}: ${yMetric.display(
+              yMetric.value(point.summary),
+            )} ${yMetric.label}, ${xMetric.display(xMetric.value(point.summary))} ${
+              xMetric.label
+            }`}
             role="button"
             tabIndex={0}
             onClick={() => onSelectConfig(point.summary.configId)}
@@ -904,14 +913,15 @@ function TradeoffChart({
             <circle
               cx={point.x}
               cy={point.y}
-              r={9}
+              r={11}
               className={`chart-dot dot-${point.index % 5}`}
             />
             <text
-              x={clamp(point.x + 13, padLeft + 12, width - 95)}
-              y={clamp(point.y + 4, padTop + 12, height - padBottom - 6)}
-              className="chart-point-label">
-              {shortLabel(point.summary.label)}
+              x={point.x}
+              y={point.y + 4}
+              textAnchor="middle"
+              className="chart-dot-label">
+              {point.index + 1}
             </text>
           </g>
         ))}
@@ -924,7 +934,7 @@ function TradeoffChart({
             key={point.summary.configId}
             onClick={() => onSelectConfig(point.summary.configId)}>
             <i className={`legend-dot dot-${point.index % 5}`} />
-            {shortLabel(point.summary.label)} {yMetric.display(yMetric.value(point.summary))} /{' '}
+            {point.index + 1}. {point.summary.label}: {yMetric.display(yMetric.value(point.summary))} /{' '}
             {xMetric.display(xMetric.value(point.summary))}
           </button>
         ))}
@@ -972,6 +982,9 @@ function MetricBars({
         <div>
           <p className="eyebrow">Harness profile</p>
           <h2>Quality and efficiency bars</h2>
+          <p className="chart-description">
+            Bars break each harness into score, required-evidence coverage, citation support, and token economy.
+          </p>
         </div>
       </div>
       <div className="bar-groups">
@@ -1028,6 +1041,10 @@ function CaseHeatmap({
         <div>
           <p className="eyebrow">Case heatmap</p>
           <h2>Where each harness wins or struggles</h2>
+          <p className="chart-description">
+            Rows are eval cases and columns are harnesses. Darker teal is stronger for the selected metric;
+            warmer cells show cases to review.
+          </p>
         </div>
         <SegmentedControl
           label="Heatmap metric"

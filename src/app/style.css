@@ -236,6 +236,14 @@ h3 {
 .chart-head > div:first-child {
   display: grid;
   gap: 3px;
+  max-width: 760px;
+}
+
+.chart-description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  max-width: 720px;
 }
 
 .chart-head > span {
@@ -305,20 +313,22 @@ h3 {
   stroke-width: 1;
 }
 
-.chart-label,
-.chart-point-label {
+.chart-label {
   fill: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
 
-.chart-point-label {
-  fill: var(--ink-soft);
-}
-
 .chart-dot {
   stroke: #ffffff;
   stroke-width: 3;
+}
+
+.chart-dot-label {
+  fill: #ffffff;
+  font-size: 10px;
+  font-weight: 820;
+  pointer-events: none;
 }
 
 .chart-point {
@@ -330,11 +340,6 @@ h3 {
 .chart-point.active .chart-dot {
   stroke: var(--ink);
   stroke-width: 4;
-}
-
-.chart-point.active .chart-point-label {
-  fill: var(--ink);
-  font-weight: 820;
 }
 
 .dot-0 {
