@@ -11,6 +11,7 @@ import {retrieve} from '../lib/retrieval';
 import {retrieveWithOpenAIEmbeddings} from '../lib/semanticRetrieval';
 import {containsTemporalIntent} from '../lib/text';
 import {AgentAnswer, BenchmarkRun, CaseGrade, EvalCase} from '../lib/types';
+import {retrieveWithLocalVectorDatabase} from '../lib/vectorDatabase';
 
 async function main(): Promise<void> {
   loadLocalEnv();
@@ -47,6 +48,8 @@ async function main(): Promise<void> {
         input: {
           query: testCase.query,
           configId: config.id,
+          promptPolicy: config.promptPolicy,
+          orchestrationPolicy: config.orchestrationPolicy,
         },
         output: {
           category: testCase.category,
@@ -54,6 +57,8 @@ async function main(): Promise<void> {
           temporalIntent: containsTemporalIntent(testCase.query),
           expectedRetrievalShape:
             testCase.requiredEvidence.length > 1 ? 'multi_meeting' : 'single_or_latest_meeting',
+          contextPolicy: config.contextPolicy,
+          toolPolicy: config.toolPolicy,
         },
       };
 
@@ -61,6 +66,8 @@ async function main(): Promise<void> {
       const contexts =
         config.retrievalStrategy === 'openai_embeddings'
           ? await retrieveWithOpenAIEmbeddings(testCase.query, meetings, config)
+          : config.retrievalStrategy === 'local_vector_database'
+            ? retrieveWithLocalVectorDatabase(testCase.query, meetings, config)
           : retrieve(testCase.query, meetings, config);
       const retrievalLatencyMs = Date.now() - retrievalStarted;
       const retrievalStep = {
@@ -73,10 +80,14 @@ async function main(): Promise<void> {
         tool:
           config.retrievalStrategy === 'openai_embeddings'
             ? 'bm25_candidates_openai_embedding_rerank'
+            : config.retrievalStrategy === 'local_vector_database'
+              ? 'local_vector_database_retrieve'
             : 'local_bm25_retrieve',
         input: {
           source: config.source,
           retrievalStrategy: config.retrievalStrategy,
+          contextPolicy: config.contextPolicy,
+          toolPolicy: config.toolPolicy,
           embeddingModel: config.embeddingModel,
           candidatePool: config.candidatePool,
           topK: config.topK,

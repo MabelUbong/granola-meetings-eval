@@ -18,6 +18,18 @@ type OpenAIResponse = {
   };
 };
 
+type JsonSchemaResponseFormat = {
+  name: string;
+  description?: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
+};
+
+type CallOpenAIOptions = {
+  temperature?: number;
+  jsonSchema?: JsonSchemaResponseFormat;
+};
+
 type EmbeddingsResponse = {
   data?: Array<{
     embedding: number[];
@@ -67,6 +79,10 @@ function postJson<T>(url: string, apiKey: string, body: unknown): Promise<T> {
   });
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function extractText(response: OpenAIResponse): string {
   if (response.output_text) {
     return response.output_text;
@@ -84,32 +100,67 @@ function extractText(response: OpenAIResponse): string {
   return response.choices?.[0]?.message?.content || '';
 }
 
-export async function callOpenAI(model: string, input: string): Promise<string> {
+function requireText(response: OpenAIResponse): string {
+  const text = extractText(response);
+  if (!text) {
+    throw new Error('OpenAI response did not include text output');
+  }
+  return text;
+}
+
+export async function callOpenAI(model: string, input: string, options: CallOpenAIOptions = {}): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY is not set');
   }
 
   try {
-    const responsesBody = {
+    const responsesBody: Record<string, unknown> = {
       model,
       input,
-      temperature: 0.1,
+      temperature: options.temperature ?? 0.1,
     };
+    if (options.jsonSchema) {
+      responsesBody.text = {
+        format: {
+          type: 'json_schema',
+          name: options.jsonSchema.name,
+          description: options.jsonSchema.description,
+          schema: options.jsonSchema.schema,
+          strict: options.jsonSchema.strict ?? true,
+        },
+      };
+    }
     const response = await postJson<OpenAIResponse>('https://api.openai.com/v1/responses', apiKey, responsesBody);
-    return extractText(response);
+    return requireText(response);
   } catch (responsesError) {
-    const chatBody = {
+    const chatBody: Record<string, unknown> = {
       model,
-      temperature: 0.1,
+      temperature: options.temperature ?? 0.1,
       messages: [{role: 'user', content: input}],
     };
-    const response = await postJson<OpenAIResponse>('https://api.openai.com/v1/chat/completions', apiKey, chatBody);
-    const text = extractText(response);
-    if (!text) {
-      throw responsesError;
+    if (options.jsonSchema) {
+      chatBody.response_format = {
+        type: 'json_schema',
+        json_schema: {
+          name: options.jsonSchema.name,
+          description: options.jsonSchema.description,
+          schema: options.jsonSchema.schema,
+          strict: options.jsonSchema.strict ?? true,
+        },
+      };
     }
-    return text;
+
+    try {
+      const response = await postJson<OpenAIResponse>('https://api.openai.com/v1/chat/completions', apiKey, chatBody);
+      return requireText(response);
+    } catch (chatError) {
+      throw new Error(
+        `OpenAI Responses API failed: ${errorMessage(
+          responsesError,
+        )}; Chat Completions fallback failed: ${errorMessage(chatError)}`,
+      );
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 # Granola Meetings Agent Benchmark Report
 
-Generated: 2026-10-26T16:39:52.684Z
+Generated: 2026-10-26T18:06:30.634Z
 
 ## Abstract
 
@@ -12,44 +12,50 @@ The grader intentionally separates evidence recall, answer coverage, citation be
 
 ## Harnesses Tested
 
-- Notes BM25 (`notes_bm25`): Searches only Granola titles, lists, attendees, and generated notes. This is cheap and fast, but misses details only present in raw transcript.
-- Hybrid Transcript BM25 (`hybrid_transcript_bm25`): Searches metadata/notes plus overlapping transcript chunks, then packs diversified evidence into the answer context.
+- OpenAI Semantic Hybrid (`openai_semantic_hybrid`): Uses BM25 as candidate generation, OpenAI embeddings for semantic reranking, and an OpenAI model to synthesize the final answer with citations.
+
+These are harness comparisons rather than only model comparisons. The default offline harnesses keep the answerer deterministic and vary the surrounding agent system: tool policy, orchestration loop, context packing, recency handling, and prompt/grounding policy. The OpenAI semantic harness is optional because it adds network dependency and model variance.
+
+### Harness Design Matrix
+
+| Harness | Orchestration / loop | Context management | Tools / execution | Prompt / answer policy |
+| --- | --- | --- | --- | --- |
+| OpenAI Semantic Hybrid | Two-stage retrieval loop: BM25 candidate generation, embedding rerank, then model synthesis. | Semantic-reranked hybrid context, top 10 results, up to two chunks per meeting, 16k character budget. | Local BM25 candidate generation plus OpenAI embeddings and OpenAI answer synthesis. | Model-backed synthesis prompt constrained to supplied evidence and bracketed meeting-id citations. |
 
 ## Results
 
 | Harness | Avg score | LLM judge | Retrieval recall@k | Answer correctness proxy | Citation recall | Citation support | Hallucination rate | Tool success | Avg tokens | Est. run cost | Avg latency |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Notes BM25 | 0.798 | n/a | 95% | 49% | 95% | 40% | 0% | 100% | 4437 | $0.0000 | 431 ms |
-| Hybrid Transcript BM25 | 0.786 | n/a | 98% | 48% | 90% | 36% | 0% | 100% | 6413 | $0.0000 | 8086 ms |
+| OpenAI Semantic Hybrid | 0.774 | n/a | 98% | 41% | 98% | 27% | 0% | 100% | 34281 | $0.0058 | 5005 ms |
 
-Best overall: Notes BM25 at 0.798.
+Best overall: OpenAI Semantic Hybrid at 0.774.
 
 ## Case-Level Scores
 
 | Case | Category | Difficulty | Query | Scores |
 | --- | --- | --- | --- | --- |
-| deepgram_pricing_capacity_evolution | cross-meeting synthesis | hard | How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks? | notes_bm25: 0.753; hybrid_transcript_bm25: 0.744 |
-| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | notes_bm25: 0.835; hybrid_transcript_bm25: 0.864 |
-| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | notes_bm25: 0.975; hybrid_transcript_bm25: 0.934 |
-| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | notes_bm25: 0.661; hybrid_transcript_bm25: 0.732 |
-| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | notes_bm25: 0.755; hybrid_transcript_bm25: 0.726 |
-| latest_standup_launch_blockers | temporal retrieval | medium | What were the action items and launch blockers in the latest standup? | notes_bm25: 0.798; hybrid_transcript_bm25: 0.789 |
-| ramp_enterprise_terms | sales retrieval | easy | What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed? | notes_bm25: 0.824; hybrid_transcript_bm25: 0.815 |
-| kraken_procurement_readiness | sales retrieval | easy | What procurement and security requirements did Kraken raise before broader Granola rollout? | notes_bm25: 0.776; hybrid_transcript_bm25: 0.767 |
-| plus_capital_compliance_followup | sales/compliance synthesis | medium | What compliance needs did Plus Capital have, and how did the follow-up change the product ask? | notes_bm25: 0.836; hybrid_transcript_bm25: 0.730 |
-| salesforce_pricing_insufficient_evidence | ambiguity and grounding | hard | What did Patrick from Salesforce agree to pay for Granola? | notes_bm25: 0.770; hybrid_transcript_bm25: 0.761 |
+| deepgram_pricing_capacity_evolution | cross-meeting synthesis | hard | How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks? | openai_semantic_hybrid: 0.702 |
+| aws_api_gateway_streaming | single-meeting technical retrieval | medium | What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming? | openai_semantic_hybrid: 0.660 |
+| workspace_privacy_design_themes | product feedback synthesis | hard | Across the workspace feedback calls, what were the recurring concerns about privacy, ownership, and personal versus team spaces? | openai_semantic_hybrid: 0.934 |
+| ios_feedback_recurring_requests | product feedback synthesis | hard | What themes kept coming up in iOS app feedback, and which requests looked most actionable? | openai_semantic_hybrid: 0.648 |
+| oncall_handover_recurring_incidents | operations retrieval | medium | What issues should the next on-call engineer watch based on the March on-call handovers? | openai_semantic_hybrid: 0.752 |
+| latest_standup_launch_blockers | temporal retrieval | medium | What were the action items and launch blockers in the latest standup? | openai_semantic_hybrid: 0.798 |
+| ramp_enterprise_terms | sales retrieval | easy | What did Granola agree to change for Ramp, and what pricing/compliance terms were discussed? | openai_semantic_hybrid: 0.824 |
+| kraken_procurement_readiness | sales retrieval | easy | What procurement and security requirements did Kraken raise before broader Granola rollout? | openai_semantic_hybrid: 0.819 |
+| plus_capital_compliance_followup | sales/compliance synthesis | medium | What compliance needs did Plus Capital have, and how did the follow-up change the product ask? | openai_semantic_hybrid: 0.836 |
+| salesforce_pricing_insufficient_evidence | ambiguity and grounding | hard | What did Patrick from Salesforce agree to pay for Granola? | openai_semantic_hybrid: 0.770 |
 
 ## Discussion
 
-The benchmark is deliberately small, but the cases stress different failure modes. Notes-only retrieval should do well when Granola's generated notes already contain the answer, while transcript search should recover details that were omitted or phrased differently in notes. Temporal cases test whether a harness recognizes "latest" as an ordering constraint instead of a lexical keyword. Cross-meeting cases test diversification: returning six chunks from one meeting is usually worse than returning one strong chunk from each relevant meeting.
+The benchmark is deliberately small, but the cases stress different failure modes. Notes-only retrieval should do well when Granola's generated notes already contain the answer, while transcript search should recover details that were omitted or phrased differently in notes. Compact, balanced, wide-context, and recency-weighted harnesses test whether the surrounding agent loop improves results without changing model weights. Temporal cases test whether a harness recognizes "latest" as an ordering constraint instead of a lexical keyword. Cross-meeting cases test diversification: returning six chunks from one meeting is usually worse than returning one strong chunk from each relevant meeting.
 
 The current default run uses deterministic extractive answering so the benchmark is repeatable without an API key. When `OPENAI_API_KEY` is set, the same harness can run model-backed answering; the deterministic grader remains the same so retrieval and model changes are comparable. Passing `--judge` adds an OpenAI LLM-as-judge pass that scores semantic correctness, citation faithfulness, completeness, and hallucination risk as secondary diagnostics.
 
 Each result row includes a trace with:
 
 - `interpret_query`: query category, difficulty, temporal intent, and expected retrieval shape.
-- `retrieve_context`: retrieval strategy, context budget, returned meeting IDs, chunk types, and scores.
-- `generate_answer_*`: whether the answer used an LLM or the deterministic extractive fallback, citation IDs, and fallback errors if any.
+- `retrieve_context`: retrieval strategy, context policy, tool policy, context budget, returned meeting IDs, chunk types, and scores.
+- `generate_answer_*`: whether the answer used an LLM or the deterministic extractive fallback, prompt policy, citation IDs, and fallback errors if any.
 - `judge_answer_with_model`: optional LLM-as-judge scores and rationale when `--judge` is enabled.
 
 ## Observability and Evaluation
@@ -71,15 +77,21 @@ Each result includes estimated prompt tokens, completion tokens, embedding token
 ## A/B Experiment Plan
 
 - Control: `notes_bm25`, cheap notes-only retrieval.
-- Treatment A: `hybrid_transcript_bm25`, higher-recall transcript retrieval with no model dependency.
-- Treatment B: `openai_semantic_hybrid`, semantic RAG with embedding rerank and model synthesis.
+- Treatment A: `compact_hybrid_bm25`, tight context compaction and meeting diversification.
+- Treatment B: `hybrid_transcript_bm25`, balanced transcript retrieval with no model dependency.
+- Treatment C: `wide_context_hybrid_bm25`, higher-recall context packing with latency/token guardrails.
+- Treatment D: `recency_weighted_hybrid_bm25`, temporal ranking for latest/current questions.
+- Treatment E: `local_vector_database_rag`, local vector database retrieval fused with BM25 over the same notes/transcript corpus.
+- Optional Treatment F: `openai_semantic_hybrid`, semantic RAG with embedding rerank and model synthesis.
 - Primary metrics: grounded correctness, evidence recall, human-review pass rate.
 - Guardrails: p95 latency, estimated cost per successful answer, no-answer correctness, citation precision, user thumbs-down rate.
 - Ramp: internal dogfood, then 5% traffic, then 25%, with rollback on latency/cost or hallucination regressions.
 
 ## Notable Failures
 
-- notes_bm25 on ios_feedback_recurring_requests: score 0.661. Missing evidence: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
+- openai_semantic_hybrid on deepgram_pricing_capacity_evolution: score 0.702. Missing evidence: none. Weak citation spans: 69496ba5-5315-4b03-b589-df4ee3750ba6, 72454729-0f61-42db-a213-012bb765892b. Missing terms: $218k, $0.13, Nova 3, 5M hours, 17-18,000, TCO. Query: How did Deepgram pricing and capacity discussions evolve from the contract sync to the February concurrency talks?
+- openai_semantic_hybrid on aws_api_gateway_streaming: score 0.660. Missing evidence: none. Weak citation spans: 567e57e3-4e8b-4094-a7cd-f54aec239b24. Missing terms: 80 AWS Lambdas, single entry point, HTTP streaming, proxy integration, chunked transfer, 30-minute, 10MB. Query: What did AWS suggest for Granola's Lambda/API Gateway architecture, especially for HTTP streaming?
+- openai_semantic_hybrid on ios_feedback_recurring_requests: score 0.648. Missing evidence: 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Weak citation spans: eeaa7f47-c867-40d8-b182-1798327ec43b, d60975a6-5a5d-46a6-80d4-d5c79e438489, 9a690f35-b543-4d68-817b-d8bdb1a06c3f. Missing terms: phone on table, AirPods, real-time transcript, Apple Notes, walk and talk. Query: What themes kept coming up in iOS app feedback, and which requests looked most actionable?
 
 ## Extensions
 

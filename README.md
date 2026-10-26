@@ -11,16 +11,20 @@ A compact benchmark for comparing meeting-corpus agents over the provided Granol
 - sales/compliance summaries
 - unsupported-specific handling, where the right answer is to avoid inventing facts
 
-The default run compares two offline harnesses:
+The default run compares several offline harnesses. These are not just retrieval labels; each one captures a different surrounding agent setup: tool policy, orchestration loop, context packing, recency handling, and prompt/grounding policy.
 
 - `notes_bm25`: searches titles, lists, people, and generated meeting notes
+- `compact_hybrid_bm25`: searches notes plus transcripts, then aggressively compacts and diversifies the context
 - `hybrid_transcript_bm25`: searches notes plus overlapping transcript chunks
+- `wide_context_hybrid_bm25`: gives the agent a larger context window and allows more chunks per meeting
+- `recency_weighted_hybrid_bm25`: uses the hybrid toolchain with a stronger temporal/recency ranking policy
+- `local_vector_database_rag`: indexes notes and transcript chunks into a local vector database and fuses vector search with BM25 candidates
 
 There is also an OpenAI-backed RAG harness:
 
 - `openai_semantic_hybrid`: uses BM25 only for candidate generation, reranks candidates with OpenAI embeddings, then asks an OpenAI model to synthesize the answer with citations
 
-The default answerer is deterministic and extractive so the benchmark can be rerun without model variance or an API key. If `OPENAI_API_KEY` is set, pass `--llm` to use a model-backed answerer over the same retrieved context.
+The default answerer is deterministic and extractive so the benchmark can be rerun without model variance or an API key. If `OPENAI_API_KEY` is set, pass `--llm` to use a model-backed answerer over the same retrieved context. The point of the offline comparison is to show that the same answerer can produce different outcomes when the harness changes.
 
 The grader separates meeting-level citation recall from citation span support. Citation recall checks whether the answer cited the required meeting; citation span support checks whether the cited snippet overlaps the expected supporting evidence, which makes weak or title-only citations visible. The deterministic grader is the default because it is repeatable, cheap, and easy to compare across runs. An optional OpenAI LLM-as-judge pass can be enabled with `--judge` to add semantic correctness, citation faithfulness, completeness, and hallucination-risk diagnostics.
 
@@ -32,6 +36,7 @@ Online evaluation plan: `docs/online-evaluation.md` defines A/B arms, event sche
 
 - `src/cli/`: command-line entry points for ingesting data, running evals, rendering reports, creating human-review samples, and checking regressions
 - `src/lib/retrieval.ts`: local BM25 retrieval over notes and transcript chunks
+- `src/lib/vectorDatabase.ts`: local vector database retrieval over notes and transcript chunks
 - `src/lib/semanticRetrieval.ts`: OpenAI embedding rerank for the semantic RAG harness
 - `src/lib/answer.ts`: deterministic extractive answerer and optional OpenAI answer synthesis
 - `src/lib/grade.ts`: deterministic offline grader and aggregate metrics
@@ -71,7 +76,7 @@ Or run the core benchmark/report pipeline:
 npm run prepare-data
 ```
 
-Run one config:
+Run one harness:
 
 ```bash
 npm run eval -- --config hybrid_transcript_bm25
@@ -87,6 +92,12 @@ Run the optional OpenAI LLM-as-judge pass:
 
 ```bash
 npm run eval -- --judge
+```
+
+Because the default run now evaluates five offline harnesses, `--judge` makes one judge call per case per harness. To keep cost down, judge a subset with `--config`, for example:
+
+```bash
+npm run eval -- --config notes_bm25,wide_context_hybrid_bm25 --judge
 ```
 
 Run the OpenAI semantic RAG harness:
@@ -111,6 +122,21 @@ npm run dev
 
 Open the Vite URL and inspect aggregate scores, per-case answers, retrieved evidence, and missing rubric terms.
 
+## Vercel Deployment
+
+This is a Vite/React app, so it can be deployed directly to Vercel from this project directory. The Vercel build command is `npm run build` and the output directory is `dist`, both captured in `vercel.json`.
+
+For a deployment with populated dashboard results, generate the public results file before deploying:
+
+```bash
+npm run build:cli
+npm run ingest
+npm run eval
+npm run report
+```
+
+That writes `public/results/latest-results.json`, which the dashboard loads at runtime. If private meeting data should not be deployed, the app still builds and the tracked `reports/benchmark-report.md` remains the shareable experiment artifact.
+
 ## Outputs
 
 - `data/processed/meetings.json`: local merged corpus, ignored by git
@@ -123,7 +149,7 @@ Open the Vite URL and inspect aggregate scores, per-case answers, retrieved evid
 
 ### Efficiently find the correct content
 
-Implemented with three retrieval paths: notes-only BM25, hybrid notes plus transcript chunks, and OpenAI embedding rerank over BM25 candidates. The hybrid approach keeps lexical retrieval as a cheap baseline while allowing transcript evidence to recover facts not present in notes. Evidence: `src/lib/retrieval.ts`, `src/lib/semanticRetrieval.ts`, `src/lib/configs.ts`.
+Implemented with four retrieval paths: notes-only BM25, hybrid notes plus transcript chunks, local vector database plus BM25 fusion, and OpenAI embedding rerank over BM25 candidates. The hybrid approach keeps lexical retrieval as a cheap baseline while allowing transcript evidence to recover facts not present in notes; the vector database path tests cosine-similarity retrieval over the same corpus while retaining BM25 as a grounding-oriented retriever. Evidence: `src/lib/retrieval.ts`, `src/lib/vectorDatabase.ts`, `src/lib/semanticRetrieval.ts`, `src/lib/configs.ts`.
 
 ### Know whether one query approach is better than another
 
@@ -151,7 +177,7 @@ The default answerer and grader are deterministic so runs can be compared withou
 
 ### Compare at least two approaches
 
-The default run compares `notes_bm25` and `hybrid_transcript_bm25`. A third optional harness, `openai_semantic_hybrid`, uses embedding rerank and model synthesis when an API key and network are available. Evidence: `src/lib/configs.ts`, `npm run eval`, `npm run eval:openai`.
+The default run compares notes-only BM25, compact hybrid BM25, balanced hybrid BM25, wide-context BM25, recency-weighted BM25, and vector database + BM25 RAG harnesses. The optional `openai_semantic_hybrid` harness uses embedding rerank and model synthesis when an API key and network are available. Evidence: `src/lib/configs.ts`, `npm run eval`, `npm run eval:openai`.
 
 ### Minimal agent or harness
 
@@ -191,8 +217,8 @@ The eval set includes retrieval-style questions, lateral/cross-meeting synthesis
 
 ## Optimization Notes
 
-- Retrieval: BM25 is used as a cheap, strong baseline; hybrid transcript retrieval expands recall; OpenAI embeddings rerank only a candidate pool to control cost. Evidence: `src/lib/retrieval.ts`, `src/lib/semanticRetrieval.ts`.
-- Context packing: retrieved passages are clipped to a context character budget and limited by docs per meeting to reduce redundant chunks. Evidence: `src/lib/retrieval.ts`.
+- Retrieval: BM25 is used as a cheap, strong baseline; hybrid transcript retrieval expands recall; local vector database retrieval tests cosine-similarity RAG with BM25 fusion and no external service; OpenAI embeddings rerank only a candidate pool to control cost. Evidence: `src/lib/retrieval.ts`, `src/lib/vectorDatabase.ts`, `src/lib/semanticRetrieval.ts`.
+- Context packing: harnesses vary top-k, transcript chunk size, overlap, docs per meeting, context character budget, and temporal recency weighting to test compact vs wide vs recency-aware agent behavior. Evidence: `src/lib/configs.ts`, `src/lib/retrieval.ts`.
 - Answering: deterministic extractive answering is the default for repeatable CI-style evals; model-backed answering is opt-in with `--llm`. Evidence: `src/lib/answer.ts`.
 - Judging: deterministic metrics remain primary; optional `--judge` adds semantic validation when API access is available. Evidence: `src/lib/grade.ts`, `src/lib/llmJudge.ts`.
 - Observability: every run records interpretation, retrieval, generation, and optional judge trace steps with latency and structured outputs. Evidence: `src/cli/eval.ts`, `src/lib/types.ts`.

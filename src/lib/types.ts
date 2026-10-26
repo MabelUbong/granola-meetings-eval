@@ -14,8 +14,12 @@ export type HarnessConfig = {
   id: string;
   label: string;
   description: string;
+  promptPolicy: string;
+  orchestrationPolicy: string;
+  contextPolicy: string;
+  toolPolicy: string;
   source: CorpusSource;
-  retrievalStrategy: 'bm25' | 'openai_embeddings';
+  retrievalStrategy: 'bm25' | 'local_vector_database' | 'openai_embeddings';
   answerStrategy: 'extractive' | 'openai';
   embeddingModel?: string;
   candidatePool?: number;

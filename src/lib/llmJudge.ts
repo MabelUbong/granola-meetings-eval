@@ -25,6 +25,62 @@ function parseJudgeJson(text: string): Record<string, unknown> {
   return JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
 }
 
+const judgeResponseFormat = {
+  name: 'meeting_qa_judge',
+  description: 'Scores a meeting-corpus QA answer for correctness, faithfulness, completeness, and hallucination risk.',
+  strict: true,
+  schema: {
+    type: 'object',
+    additionalProperties: false,
+    required: [
+      'answerCorrectness',
+      'citationFaithfulness',
+      'completeness',
+      'hallucinationRisk',
+      'rationale',
+      'missingEvidence',
+      'unsupportedClaims',
+    ],
+    properties: {
+      answerCorrectness: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+      },
+      citationFaithfulness: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+      },
+      completeness: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+      },
+      hallucinationRisk: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+      },
+      rationale: {
+        type: 'string',
+      },
+      missingEvidence: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+      unsupportedClaims: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+    },
+  },
+};
+
 function judgePrompt(testCase: EvalCase, answer: AgentAnswer): string {
   const payload = {
     query: testCase.query,
@@ -67,7 +123,7 @@ export async function judgeAnswerWithOpenAI(
   const started = Date.now();
 
   try {
-    const responseText = await callOpenAI(model, prompt);
+    const responseText = await callOpenAI(model, prompt, {jsonSchema: judgeResponseFormat});
     const latencyMs = Date.now() - started;
     const parsed = parseJudgeJson(responseText);
     const answerCorrectness = clampScore(parsed.answerCorrectness);
